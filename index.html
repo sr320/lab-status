@@ -96,6 +96,11 @@ td.r,th.r{text-align:right}
 .bar i{position:absolute;inset:0 auto 0 0;border-radius:4px;background:var(--ok)}
 .bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
 .hosts td:first-child{font-weight:700}
+.cores{display:grid;grid-template-columns:repeat(auto-fill,minmax(22px,1fr));gap:3px;margin:12px 0 4px}
+.cores i{display:block;height:28px;border-radius:3px;background:var(--unk-bg);position:relative;overflow:hidden}
+.cores i b{position:absolute;inset:auto 0 0 0;background:var(--ok)}
+.cores i b.warn{background:var(--warn)} .cores i b.bad{background:var(--bad)}
+h4.mini{font-size:13px;color:var(--muted);margin:14px 0 0}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unk);margin-right:6px;vertical-align:baseline}
 .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
 ul.plain{list-style:none;margin:8px 0 0;padding:0;font-size:14px}
@@ -152,10 +157,15 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
     <div>
       <h2>Computing <a href="https://robertslab.github.io/resources/Computing-Hardware/" target="_blank" rel="noopener">Handbook page</a></h2>
-      <p class="sub">Network checks plus the daily raven, gannet and klone snapshots.</p>
+      <p class="sub">Network checks, raven's 5-minute snapshot, and the daily raven, gannet and klone reports.</p>
 
       <section class="panel" id="p-hosts">
         <h3>Reachable? <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-ravenlive">
+        <h3>raven right now <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
 
@@ -190,6 +200,10 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
 /* ---------- sources ---------- */
 var STATUS_BASE = "https://raw.githubusercontent.com/RobertsLab/resources/server-status/status/";
+// api.github.com caches for 60 s and sends CORS headers; raw.githubusercontent caches for 5 min.
+var RAVEN_LIVE_API = "https://api.github.com/repos/sr320/lab-status/contents/raven-live.json?ref=raven-live";
+var RAVEN_LIVE_RAW = "https://raw.githubusercontent.com/sr320/lab-status/raven-live/raven-live.json";
+var RAVEN_LIVE_STALE_MIN = 15;
 var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
 var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
 var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
@@ -405,7 +419,46 @@ function renderInLab(r){
 }
 
 /* ---------- Computing ---------- */
-function renderHosts(ext, int){
+function getRavenLive(){
+  return fetch(RAVEN_LIVE_API, {cache:"no-store", headers:{Accept:"application/vnd.github.raw"}})
+    .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .catch(function(){ return getJSON(RAVEN_LIVE_RAW); });
+}
+function ravenLiveFresh(r){ var h = r && r.ok ? hoursSince(r.v.generated) : null; return h != null && h * 60 <= RAVEN_LIVE_STALE_MIN; }
+function gib(b){ return (b / 1073741824).toFixed(b >= 10737418240 ? 0 : 1) + " GB"; }
+function dur(s){ return s < 3600 ? Math.round(s / 60) + " min" : s < 172800 ? Math.round(s / 3600) + " h" : Math.round(s / 86400) + " days"; }
+
+function renderRavenLive(r){
+  if (!r.ok){ fail("p-ravenlive", "No live snapshot from raven yet (" + r.e.message + ")."); return; }
+  var d = r.v, m = d.memory, ncores = (d.cores || []).length;
+  setAge("p-ravenlive", d.generated, RAVEN_LIVE_STALE_MIN / 60);
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("CPU busy", fmt(d.cpu_percent, 0), "%"),
+    reading("Load (1, 5, 15 min) on " + ncores + " cores", d.load.map(function(x){ return fmt(x, 1); }).join("  ")),
+    reading("Memory used", gib(m.used), "of " + gib(m.total)),
+    m.swap_total ? reading("Swap used", gib(m.swap_used)) : null
+  ])];
+  nodes.push(el("div", {cls:"cores", role:"img", "aria-label": "Per-core CPU use"}, d.cores.map(function(c, i){
+    var b = el("b", {cls: level(c, 70, 95)}); b.style.height = Math.max(0, Math.min(100, c)) + "%";
+    return el("i", {title: "core " + i + ": " + fmt(c, 0) + "%"}, [b]);
+  })));
+  if (d.users && d.users.length){
+    nodes.push(el("h4", {cls:"mini", text:"By user"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"User"}), el("th", {cls:"r", text:"Cores in use"}), el("th", {cls:"r", text:"Memory"}), el("th", {cls:"r", text:"Processes"})])]),
+      el("tbody", {}, d.users.map(function(u){ return el("tr", {}, [el("td", {text:u.user}), el("td", {cls:"r num", text: fmt(u.cpu / 100, 1)}), el("td", {cls:"r num", text: gib(u.mem_bytes)}), el("td", {cls:"r num", text: String(u.procs)})]); }))])]));
+  }
+  if (d.processes && d.processes.length){
+    nodes.push(el("h4", {cls:"mini", text:"Top processes"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"User"}), el("th", {text:"Process"}), el("th", {cls:"r", text:"CPU"}), el("th", {cls:"r", text:"Mem"}), el("th", {cls:"r", text:"Running"})])]),
+      el("tbody", {}, d.processes.map(function(p){ return el("tr", {}, [el("td", {text:p.user}), el("td", {text:p.name}), el("td", {cls:"r num", text: fmt(p.cpu, 0) + "%"}), el("td", {cls:"r num", text: gib(p.rss_bytes)}), el("td", {cls:"r num muted", text: dur(p.running_s)})]); }))])]));
+  }
+  nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: d.tasks + " tasks, up " + dur(d.uptime_s) + ". Raven pushes a snapshot every 5 minutes; CPU is sampled over 2 seconds, and 100% is one full core."}));
+  body("p-ravenlive", nodes);
+  var h = hoursSince(d.generated);
+  if (h * 60 > RAVEN_LIVE_STALE_MIN) issue("raven", "warn", "Live snapshot is " + ago(d.generated));
+}
+
+function renderHosts(ext, int, ravenLive){
   var docs = [ext, int].filter(function(r){ return r.ok && r.v && r.v.hosts; }).map(function(r){ return r.v; });
   if (!docs.length){ fail("p-hosts", "Server status feed not reachable."); ["raven","gannet","klone"].forEach(function(h){ mark(h, "unk", "no status"); }); return; }
   var best = {};
@@ -417,7 +470,8 @@ function renderHosts(ext, int){
   setAge("p-hosts", newest, HOST_STALE_H);
   var rows = ["raven","gannet","klone"].map(function(h){
     var b = best[h], lv, txt, detail = "";
-    if (!b){ lv = "unk"; txt = "no reading"; detail = h === "raven" ? "Only the in-network prober can see raven" : ""; }
+    if (h === "raven" && ravenLiveFresh(ravenLive) && (!b || hoursSince(b.iso) > HOST_STALE_H)){ lv = "ok"; txt = "up"; detail = "pushed a snapshot " + ago(ravenLive.v.generated); }
+    else if (!b){ lv = "unk"; txt = "no reading"; detail = h === "raven" ? "Only the in-network prober can see raven" : ""; }
     else if (hoursSince(b.iso) > HOST_STALE_H){ lv = "unk"; txt = "stale"; detail = "last checked " + ago(b.iso); }
     else if (b.r.up){ lv = "ok"; txt = "up"; detail = (b.r.detail || "") + (b.r.latency_ms != null ? ", " + b.r.latency_ms + " ms" : ""); }
     else { lv = "bad"; txt = "down"; detail = b.r.detail || ""; }
@@ -536,13 +590,14 @@ function load(){
     settle(getShore("webcam.json")),
     settle(getShore("reports.json")),
     settle(getShore("field-water.json")),
-    settle(getJSON(INLAB_URL))
+    settle(getJSON(INLAB_URL)),
+    settle(getRavenLive())
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
-      function(){ renderHosts(ext, int); }, function(){ renderRaven(ext, int); },
+      function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); }, function(){ renderRaven(ext, int); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
