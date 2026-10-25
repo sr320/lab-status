@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,500;7..72,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#E9EEED; --panel:#F7F9F8; --ink:#17262E; --muted:#5A6B72; --line:#CBD5D4;
+  --sea:#2C6E73; --ok:#2E7D4F; --warn:#B07A0C; --bad:#B0342A; --unk:#7C8A90;
+  --ok-bg:#DCEDE2; --warn-bg:#F6EAC9; --bad-bg:#F5D9D5; --unk-bg:#E1E6E8;
+  --sans:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif:"Literata", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#0F1A1F; --panel:#16252C; --ink:#E3ECEC; --muted:#93A6AC; --line:#2A3D45;
+    --sea:#6FB3B3; --ok:#5DBB82; --warn:#E0AE45; --bad:#EE7B6E; --unk:#8C9BA1;
+    --ok-bg:#183A29; --warn-bg:#3C3015; --bad-bg:#45201C; --unk-bg:#22323A;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--sans);
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+a{color:var(--sea)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--sea);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+h1{font:700 clamp(28px,4vw,40px)/1.05 var(--serif);margin:0;letter-spacing:-.01em}
+.verdict{font:500 clamp(18px,2.2vw,22px)/1.3 var(--serif);margin:6px 0 0;color:var(--muted)}
+.verdict.bad{color:var(--bad)} .verdict.warn{color:var(--warn)} .verdict.ok{color:var(--ok)}
+.controls{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--sea)}
+
+/* the strip: one light per system */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:22px}
+.light{background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:2px;text-decoration:none;color:inherit;border-top:5px solid var(--unk)}
+.light[data-s=ok]{border-top-color:var(--ok)} .light[data-s=warn]{border-top-color:var(--warn)} .light[data-s=bad]{border-top-color:var(--bad)}
+.light b{font-size:15px}
+.light span{font-size:13px;color:var(--muted)}
+
+/* attention list */
+.attn{margin:0 0 26px;padding:0;list-style:none;display:grid;gap:6px}
+.attn li{display:flex;gap:10px;align-items:baseline;padding:8px 12px;border-radius:6px;background:var(--warn-bg)}
+.attn li.bad{background:var(--bad-bg)}
+.attn li .who{font-weight:700;min-width:7.5em}
+.attn:empty{display:none}
+
+/* columns */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+h2{font:700 22px/1.2 var(--serif);margin:0 0 4px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h2 a{font:400 14px var(--sans)}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+h3{font-size:16px;margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.age{font-weight:400;font-size:13px;color:var(--muted);white-space:nowrap}
+.age.stale{color:var(--warn)}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--unk-bg);color:var(--unk)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.err{color:var(--bad);font-size:14px;margin:8px 0 0}
+.muted{color:var(--muted)}
+
+.readings{display:flex;flex-wrap:wrap;gap:6px 26px;margin:10px 0 4px}
+.reading .v{font:700 30px/1.1 var(--serif)}
+.reading .v small{font:400 15px var(--sans);color:var(--muted);margin-left:2px}
+.reading .k{font-size:13px;color:var(--muted)}
+.spark{width:100%;height:46px;display:block;margin-top:6px}
+.spark path{fill:none;stroke:var(--sea);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.spark .band{fill:var(--sea);opacity:.10;stroke:none}
+
+.cam{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:520px){.cam{grid-template-columns:1fr}}
+.cam img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:var(--unk-bg);display:block}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+th{text-align:left;font-weight:700;color:var(--muted);font-size:13px;padding:4px 6px;border-bottom:1px solid var(--line)}
+td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.scroll{overflow-x:auto}
+.bar{position:relative;height:8px;border-radius:4px;background:var(--unk-bg);min-width:70px}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:4px;background:var(--ok)}
+.bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
+.hosts td:first-child{font-weight:700}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unk);margin-right:6px;vertical-align:baseline}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
+ul.plain{list-style:none;margin:8px 0 0;padding:0;font-size:14px}
+ul.plain li{padding:4px 0;border-bottom:1px solid var(--line)} ul.plain li:last-child{border:0}
+footer{margin-top:30px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){.light,.pill{transition:border-color .3s,background .3s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lab status</h1>
+      <p class="verdict" id="verdict">Checking everything…</p>
+    </div>
+    <div class="controls">
+      <span id="checked" class="num">not yet loaded</span>
+      <button id="refresh" type="button">Refresh now</button>
+    </div>
+  </header>
+
+  <nav class="strip" id="strip" aria-label="System summary"></nav>
+  <ul class="attn" id="attn" aria-label="Needs attention"></ul>
+
+  <div class="cols">
+    <div>
+      <h2>SHORE tank room <a href="http://ftr210.online" target="_blank" rel="noopener">ftr210.online</a></h2>
+      <p class="sub">Tankcam, the Seneye tank, field water and weekly checks.</p>
+
+      <section class="panel" id="p-seneye">
+        <h3>Seneye tank <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-cam">
+        <h3>Tankcam <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-wq">
+        <h3>Water quality reports <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-field">
+        <h3>Puget Sound water <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-log">
+        <h3>Tank room logbook <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+
+    <div>
+      <h2>Computing <a href="https://robertslab.github.io/resources/Computing-Hardware/" target="_blank" rel="noopener">Handbook page</a></h2>
+      <p class="sub">Network checks plus the daily raven, gannet and klone snapshots.</p>
+
+      <section class="panel" id="p-hosts">
+        <h3>Reachable? <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-raven">
+        <h3>raven disks and CPU <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-gannet">
+        <h3>gannet health <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-klone">
+        <h3>klone allocation <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Refreshes every 5 minutes while open. Data comes from the SHORE site build, the
+    <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch and the
+    <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch.
+    A green host light only means it answered on the network.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- sources ---------- */
+var STATUS_BASE = "https://raw.githubusercontent.com/RobertsLab/resources/server-status/status/";
+var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
+// The SHORE site build publishes its JSON next to the page. Try HTTPS first;
+// plain http only works when this file is opened locally or over http.
+var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/shore-line/data/","http://ftr210.online/data/"];
+var REFRESH_MS = 5 * 60 * 1000;
+
+/* thresholds */
+var HOST_STALE_H = 1.5, DAILY_STALE_H = 30, SENEYE_STALE_H = 1, WQ_STALE_D = 10, LOG_STALE_D = 7;
+var DISK_WARN = 85, DISK_BAD = 92, PART_WARN = 75, PART_BAD = 90;
+
+/* ---------- helpers ---------- */
+function $(s, r){ return (r || document).querySelector(s); }
+function el(tag, attrs, kids){
+  var n = document.createElement(tag);
+  if (attrs) for (var k in attrs){
+    if (k === "text") n.textContent = attrs[k];
+    else if (k === "cls") n.className = attrs[k];
+    else if (attrs[k] != null) n.setAttribute(k, attrs[k]);
+  }
+  (kids || []).forEach(function(c){ if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return n;
+}
+function getJSON(url){
+  var u = url + (url.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
+  return fetch(u, {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+}
+var shoreBase = null;
+function getShore(name){
+  var bases = shoreBase ? [shoreBase] : SHORE_BASES.slice();
+  function attempt(i){
+    if (i >= bases.length) return Promise.reject(new Error("SHORE data not reachable"));
+    return getJSON(bases[i] + name).then(function(d){ shoreBase = bases[i]; return d; }, function(){ return attempt(i + 1); });
+  }
+  return attempt(0);
+}
+function settle(p){ return p.then(function(v){ return {ok:true, v:v}; }, function(e){ return {ok:false, e:e}; }); }
+function hoursSince(iso){ var t = Date.parse(iso); return isNaN(t) ? null : (Date.now() - t) / 36e5; }
+function ago(iso){
+  var h = hoursSince(iso); if (h == null) return "time unknown";
+  if (h < 1/60) return "just now";
+  if (h < 1) return Math.round(h * 60) + " min ago";
+  if (h < 48) return Math.round(h) + " h ago";
+  return Math.round(h / 24) + " days ago";
+}
+function fmt(n, d){ return (n == null || isNaN(n)) ? "n/a" : Number(n).toFixed(d == null ? 1 : d); }
+function level(p, w, b){ return p >= b ? "bad" : p >= w ? "warn" : "ok"; }
+function bar(pct, lv){ var b = el("div", {cls:"bar", role:"img", "aria-label": Math.round(pct) + "% used"}); var i = el("i", {cls: lv}); i.style.width = Math.max(0, Math.min(100, pct)) + "%"; b.appendChild(i); return b; }
+function pill(lv, text){ return el("span", {cls:"pill " + lv, text:text}); }
+function setAge(id, iso, staleH){
+  var a = $("#" + id + " [data-age]"); if (!a) return;
+  a.textContent = iso ? ago(iso) : "";
+  var h = hoursSince(iso);
+  a.classList.toggle("stale", h != null && staleH != null && h > staleH);
+  if (iso) a.title = new Date(iso).toLocaleString();
+}
+function body(id, nodes){ var b = $("#" + id + " [data-body]"); b.replaceChildren.apply(b, nodes); }
+function fail(id, msg){ body(id, [el("p", {cls:"err", text: msg})]); setAge(id, null); }
+
+function spark(values, band){
+  var v = values.filter(function(x){ return x != null && !isNaN(x); });
+  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "spark"); svg.setAttribute("viewBox", "0 0 100 30"); svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "trend");
+  if (v.length < 2) return svg;
+  var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
+  if (band){ lo = Math.min(lo, band[0]); hi = Math.max(hi, band[1]); }
+  var pad = (hi - lo) * 0.1 || 0.5; lo -= pad; hi += pad;
+  function y(x){ return (30 - (x - lo) / (hi - lo) * 30).toFixed(2); }
+  if (band){
+    var r = document.createElementNS(svg.namespaceURI, "rect");
+    r.setAttribute("class", "band"); r.setAttribute("x", 0); r.setAttribute("width", 100);
+    r.setAttribute("y", y(band[1])); r.setAttribute("height", Math.max(0, y(band[0]) - y(band[1])));
+    svg.appendChild(r);
+  }
+  var d = v.map(function(x, i){ return (i ? "L" : "M") + (i / (v.length - 1) * 100).toFixed(2) + " " + y(x); }).join("");
+  var p = document.createElementNS(svg.namespaceURI, "path"); p.setAttribute("d", d); svg.appendChild(p);
+  return svg;
+}
+function reading(k, v, unit){ return el("div", {cls:"reading"}, [el("div", {cls:"v num"}, [v, unit ? el("small", {text: unit}) : null]), el("div", {cls:"k", text:k})]); }
+
+/* collects per-system state for the strip and attention list */
+var state = {}, issues = [];
+function mark(sys, lv, note){ var order = {ok:0, unk:1, warn:2, bad:3}; if (!state[sys] || order[lv] > order[state[sys].lv]) state[sys] = {lv:lv, note:note}; }
+function issue(sys, lv, msg){ issues.push({sys:sys, lv:lv, msg:msg}); mark(sys, lv, msg); }
+
+/* ---------- SHORE ---------- */
+function renderSeneye(r, tanks){
+  if (!r.ok){ fail("p-seneye", "Could not load Seneye data (" + r.e.message + ")."); issue("Seneye", "warn", "Seneye feed not reachable"); return; }
+  var d = r.v, L = d.latest || {};
+  setAge("p-seneye", L.t || d.updated_at, SENEYE_STALE_H);
+  var setpoint = null;
+  if (tanks && tanks.ok && tanks.v.systems){ var s = tanks.v.systems.filter(function(x){ return x.id === d.tank; })[0]; if (s) setpoint = s.setpoint_c; }
+  var nodes = [];
+  var readings = el("div", {cls:"readings"}, [
+    reading("Temperature" + (setpoint != null ? " (set " + fmt(setpoint) + ")" : ""), fmt(L.temp_c), "°C"),
+    reading("pH", fmt(L.ph, 2)),
+    reading("Free NH₃", fmt(L.nh3, 3), "ppm")
+  ]);
+  nodes.push(readings);
+  var f = d.series_fields || ["t","temp_c","ph","nh3"], ti = f.indexOf("temp_c");
+  var series = (d.series || []).slice(-96);
+  if (ti >= 0 && series.length){
+    nodes.push(spark(series.map(function(row){ return row[ti]; }), L.alert_c || null));
+    nodes.push(el("div", {cls:"muted", style:"font-size:13px", text: "Last " + series.length + " readings. Shaded band is the device's alert range" + (L.alert_c ? " (" + L.alert_c[0] + " to " + L.alert_c[1] + " °C)." : ".")}));
+  }
+  var h = hoursSince(L.t || d.updated_at);
+  if (h != null && h > SENEYE_STALE_H) issue("Seneye", h > 6 ? "bad" : "warn", "No reading for " + ago(L.t || d.updated_at).replace(" ago","") + " (collector runs on your Mac on the UW network)");
+  if (d.device && d.device.connected === false) issue("Seneye", "bad", "Device reports disconnected");
+  if (L.in_water === false) issue("Seneye", "bad", "Probe reports out of water");
+  if (L.slide_fitted === false) issue("Seneye", "warn", "No chemical slide fitted (pH and NH₃ unavailable)");
+  if (L.slide_expired) issue("Seneye", "warn", "Chemical slide expired");
+  if (L.alert_c && L.temp_c != null && (L.temp_c < L.alert_c[0] || L.temp_c > L.alert_c[1])) issue("Seneye", "bad", "Temperature " + fmt(L.temp_c) + " °C outside alert range");
+  mark("Seneye", "ok", fmt(L.temp_c) + " °C, pH " + fmt(L.ph, 2));
+  body("p-seneye", nodes);
+}
+
+function renderCam(r){
+  var src = "https://gannet.fish.washington.edu/v1_web/webcam/latest.jpg?t=" + Date.now();
+  var cap = null;
+  if (r.ok && r.v.latest){ src = r.v.latest.url || src; cap = r.v.latest.captured_at; }
+  setAge("p-cam", cap, 1);
+  var img = el("img", {src: src, alt: "Latest tankcam frame", loading: "lazy"});
+  img.addEventListener("error", function(){ img.replaceWith(el("p", {cls:"err", text:"Image did not load from gannet."})); issue("Tankcam", "warn", "Latest frame did not load"); paintSummary(); });
+  var info = el("div", {}, [
+    el("p", {style:"margin:0 0 6px", text: cap ? "Frame captured " + ago(cap) + "." : (r.ok ? "Capture time not reported." : "Frame time unavailable; showing gannet's latest image.")}),
+    el("a", {href: "http://ftr210.online#tankcam", target:"_blank", rel:"noopener", text: "Open on SHORE"})
+  ]);
+  body("p-cam", [el("div", {cls:"cam"}, [img, info])]);
+  var h = hoursSince(cap);
+  if (cap && h > 1) issue("Tankcam", h > 6 ? "bad" : "warn", "Latest frame is " + ago(cap));
+  else mark("Tankcam", r.ok ? "ok" : "unk", cap ? ago(cap) : "time unknown");
+}
+
+var WQ_KEYS = [["salinity_ppt","Sal","ppt"],["ph","pH",""],["alkalinity","Alk",""],["ammonia","NH₃",""],["nitrite","NO₂",""],["nitrate","NO₃",""]];
+function renderWQ(r){
+  if (!r.ok){ fail("p-wq", "SHORE data not reachable (" + r.e.message + ")."); mark("Water quality", "unk", "not reachable"); return; }
+  var d = r.v, tanks = d.tanks || [], posts = d.posts || [];
+  var newest = posts[0] && posts[0].published;
+  setAge("p-wq", newest, WQ_STALE_D * 24);
+  var nodes = [];
+  if (d.error) nodes.push(el("p", {cls:"err", text: "Feed error: " + d.error}));
+  if (tanks.length){
+    var cols = WQ_KEYS.filter(function(k){ return tanks.some(function(t){ return t.values && t.values[k[0]] != null; }); });
+    var thead = el("tr", {}, [el("th", {text:"Tank"})].concat(cols.map(function(k){ return el("th", {cls:"r", text:k[1]}); })).concat([el("th", {cls:"r", text:"Reported"})]));
+    var rows = tanks.map(function(t){
+      return el("tr", {}, [el("td", {}, [el("a", {href:t.link, target:"_blank", rel:"noopener", text:t.tank})])]
+        .concat(cols.map(function(k){ var v = t.values[k[0]]; return el("td", {cls:"r num", text: v == null ? "" : String(v)}); }))
+        .concat([el("td", {cls:"r muted", text: ago(t.reported)})]));
+    });
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [thead]), el("tbody", {}, rows)])]));
+  }
+  if (posts[0]) nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, ["Latest report: ", el("a", {href:posts[0].link, target:"_blank", rel:"noopener", text:posts[0].title}), posts[0].author ? " by " + posts[0].author : ""]));
+  if (!tanks.length && !posts.length) nodes.push(el("p", {cls:"muted", text:"No reports in the feed."}));
+  body("p-wq", nodes);
+  var h = hoursSince(newest);
+  if (h != null && h > WQ_STALE_D * 24) issue("Water quality", "warn", "No water quality report in " + ago(newest).replace(" ago",""));
+  else mark("Water quality", d.error ? "warn" : "ok", newest ? "last report " + ago(newest) : "no reports");
+}
+
+function renderField(r){
+  if (!r.ok){ fail("p-field", "SHORE data not reachable (" + r.e.message + ")."); return; }
+  var d = r.v, L = d.latest || {}, s = d.stats || {};
+  setAge("p-field", d.updated_at, 3);
+  var nodes = [];
+  if (d.error) nodes.push(el("p", {cls:"err", text:"NOAA fetch error: " + d.error}));
+  nodes.push(el("div", {cls:"readings"}, [
+    reading((d.station && d.station.name) || "NOAA station", fmt(L.temp_c), "°C"),
+    reading("Range, last " + (s.hours || "") + " h", fmt(s.min) + " to " + fmt(s.max), "°C")
+  ]));
+  if (d.series && d.series.length) nodes.push(spark(d.series.map(function(x){ return x[1]; })));
+  body("p-field", nodes);
+}
+
+function renderLog(r){
+  if (!r.ok){ fail("p-log", "SHORE data not reachable (" + r.e.message + ")."); mark("Logbook", "unk", "not reachable"); return; }
+  var d = r.v, last = d.last_entry;
+  setAge("p-log", d.updated_at, 6);
+  var nodes = [];
+  if (d.error) nodes.push(el("p", {cls:"err", text: "Logbook error: " + d.error}));
+  var weeks = (d.weeks || []).slice(-6);
+  nodes.push(el("p", {style:"margin:8px 0 6px"}, ["Last entry ", el("b", {text: last || "n/a"}), last ? " (" + ago(last + "T12:00:00").replace(" h ago"," hours ago") + ")" : "", "."]));
+  if (weeks.length){
+    var tb = weeks.map(function(w){ return el("tr", {}, [el("td", {text:"Week of " + w.week_of}), el("td", {cls:"r num", text: w.days_logged + " of 7 days"}), el("td", {style:"width:40%"}, [bar(w.days_logged / 7 * 100, w.days_logged >= 5 ? "ok" : w.days_logged >= 3 ? "warn" : "bad")])]); });
+    nodes.push(el("table", {}, [el("tbody", {}, tb)]));
+  }
+  body("p-log", nodes);
+  var h = last ? hoursSince(last + "T23:59:00") : null;
+  if (h != null && h > LOG_STALE_D * 24) issue("Logbook", "warn", "No tank room log entry since " + last);
+  else mark("Logbook", d.error ? "warn" : "ok", last ? "last " + last : "no entries");
+}
+
+/* ---------- Computing ---------- */
+function renderHosts(ext, int){
+  var docs = [ext, int].filter(function(r){ return r.ok && r.v && r.v.hosts; }).map(function(r){ return r.v; });
+  if (!docs.length){ fail("p-hosts", "Server status feed not reachable."); ["raven","gannet","klone"].forEach(function(h){ mark(h, "unk", "no status"); }); return; }
+  var best = {};
+  docs.forEach(function(doc){
+    var t = Date.parse(doc.checked);
+    Object.keys(doc.hosts).forEach(function(h){ if (!best[h] || best[h].t < t) best[h] = {t:t, iso:doc.checked, src:doc.source, r:doc.hosts[h]}; });
+  });
+  var newest = docs.map(function(d){ return d.checked; }).sort().pop();
+  setAge("p-hosts", newest, HOST_STALE_H);
+  var rows = ["raven","gannet","klone"].map(function(h){
+    var b = best[h], lv, txt, detail = "";
+    if (!b){ lv = "unk"; txt = "no reading"; detail = h === "raven" ? "Only the in-network prober can see raven" : ""; }
+    else if (hoursSince(b.iso) > HOST_STALE_H){ lv = "unk"; txt = "stale"; detail = "last checked " + ago(b.iso); }
+    else if (b.r.up){ lv = "ok"; txt = "up"; detail = (b.r.detail || "") + (b.r.latency_ms != null ? ", " + b.r.latency_ms + " ms" : ""); }
+    else { lv = "bad"; txt = "down"; detail = b.r.detail || ""; }
+    if (lv === "bad") issue(h, "bad", h + " not answering (" + detail + ")");
+    mark(h, lv === "ok" ? "ok" : lv, txt);
+    return el("tr", {}, [el("td", {}, [el("span", {cls:"dot " + (lv === "unk" ? "" : lv)}), h]), el("td", {}, [pill(lv, txt)]), el("td", {cls:"muted", text: detail})]);
+  });
+  body("p-hosts", [el("table", {cls:"hosts"}, [el("tbody", {}, rows)])]);
+}
+
+function diskTable(disks, key){
+  var sorted = disks.slice().sort(function(a, b){ return b.use_percent - a.use_percent; });
+  var rows = sorted.map(function(d){
+    var lv = level(d.use_percent, DISK_WARN, DISK_BAD);
+    return el("tr", {}, [el("td", {text: d.mount}), el("td", {cls:"r num", text: (d.used || "") + " / " + (d.size || "")}), el("td", {style:"width:30%"}, [bar(d.use_percent, lv)]), el("td", {cls:"r num", text: d.use_percent + "%"})]);
+  });
+  return el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Mount"}), el("th", {cls:"r", text:"Used"}), el("th", {text:""}), el("th", {cls:"r", text:"Full"})])]), el("tbody", {}, rows)])]);
+}
+
+function renderRaven(ext, int){
+  var cands = [ext, int].filter(function(r){ return r.ok && r.v && r.v.raven_stats; }).map(function(r){ return r.v.raven_stats; });
+  if (!cands.length){ fail("p-raven", "No raven snapshot in the status feed."); mark("raven", "unk", "no snapshot"); return; }
+  var s = cands.sort(function(a, b){ return Date.parse(b.generated) - Date.parse(a.generated); })[0];
+  setAge("p-raven", s.generated, DAILY_STALE_H);
+  var disks = s.disks || [];
+  var nodes = [el("div", {cls:"readings"}, [reading("CPU load at snapshot", fmt(s.cpu_percent, 0), "%"), reading("Memory", fmt(s.memory_percent, 1), "%")])];
+  if (disks.length) nodes.push(diskTable(disks));
+  if (s.winners && s.winners.length) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "Top CPU users: " + s.winners.slice(0, 3).map(function(w){ return w.user; }).join(", ")}));
+  body("p-raven", nodes);
+  disks.forEach(function(d){ if (d.use_percent >= DISK_WARN) issue("raven", d.use_percent >= DISK_BAD ? "bad" : "warn", d.mount + " is " + d.use_percent + "% full"); });
+  if (hoursSince(s.generated) > DAILY_STALE_H) issue("raven", "warn", "Daily snapshot is " + ago(s.generated));
+}
+
+function renderGannet(ext){
+  if (!ext.ok || !ext.v.gannet_stats){ fail("p-gannet", "No gannet health report in the status feed."); mark("gannet", "unk", "no report"); return; }
+  var g = ext.v.gannet_stats;
+  setAge("p-gannet", g.generated, DAILY_STALE_H);
+  var nodes = [];
+  // Synology lists docker overlay mounts that mirror /volume2; show real volumes only.
+  var disks = (g.disks || []).filter(function(d){ return d.mount.indexOf("@") < 0; });
+  var raid = g.raid || [], badRaid = raid.filter(function(x){ return !x.healthy; });
+  var mem = g.memory && g.memory.mem;
+  nodes.push(el("div", {cls:"readings"}, [
+    reading("RAID arrays healthy", (raid.length - badRaid.length) + " of " + raid.length),
+    reading("Uptime", (g.uptime || "n/a").split(",")[0]),
+    mem ? reading("Memory used", mem.used + " of " + mem.total) : null
+  ]));
+  if (disks.length) nodes.push(diskTable(disks));
+  var extra = [];
+  (g.failed_units || []).forEach(function(u){ extra.push(el("li", {}, [pill("warn", "failed service"), " " + (u.description || u.unit)])); });
+  (g.kernel_errors || []).slice(0, 3).forEach(function(k){ extra.push(el("li", {}, [pill("bad", "kernel"), " " + (typeof k === "string" ? k : JSON.stringify(k))])); });
+  if (extra.length) nodes.push(el("ul", {cls:"plain"}, extra));
+  nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, [el("a", {href:"https://robertslab.github.io/resources/Gannet-Dashboard/", target:"_blank", rel:"noopener", text:"Full Gannet Dashboard"})]));
+  body("p-gannet", nodes);
+
+  disks.forEach(function(d){ if (d.use_percent >= DISK_WARN) issue("gannet", d.use_percent >= DISK_BAD ? "bad" : "warn", d.mount + " is " + d.use_percent + "% full"); });
+  badRaid.forEach(function(x){ issue("gannet", "bad", "RAID " + x.name + " is " + x.state + " (" + x.active + " of " + x.members + " active)"); });
+  (g.failed_units || []).forEach(function(u){ issue("gannet", "warn", "Service failed: " + (u.description || u.unit)); });
+  if ((g.kernel_errors || []).length) issue("gannet", "warn", g.kernel_errors.length + " kernel error(s) in today's report");
+  if (hoursSince(g.generated) > DAILY_STALE_H) issue("gannet", "warn", "Health report is " + ago(g.generated));
+}
+
+function renderKlone(ext){
+  if (!ext.ok || !ext.v.hyak_stats){ fail("p-klone", "No hyakalloc snapshot in the status feed."); return; }
+  var k = ext.v.hyak_stats, parts = k.partitions || [];
+  setAge("p-klone", k.generated, DAILY_STALE_H);
+  var rows = parts.map(function(p){
+    var cpuPct = p.total.cpus ? p.used.cpus / p.total.cpus * 100 : 0;
+    var memPct = p.total.memory_gb ? p.used.memory_gb / p.total.memory_gb * 100 : 0;
+    var pct = Math.max(cpuPct, memPct), lv = level(pct, PART_WARN, PART_BAD);
+    if (lv !== "ok") issue("klone", lv, p.account + "/" + p.partition + " is " + Math.round(pct) + "% in use");
+    return el("tr", {}, [
+      el("td", {text: p.account + "/" + p.partition}),
+      el("td", {cls:"r num", text: p.used.cpus + " / " + p.total.cpus + " CPU"}),
+      el("td", {cls:"r num", text: Math.round(p.used.memory_gb) + " / " + Math.round(p.total.memory_gb) + " GB"}),
+      el("td", {style:"width:24%"}, [bar(pct, lv)])
+    ]);
+  });
+  var nodes = [el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Partition"}), el("th", {cls:"r", text:"CPU in use"}), el("th", {cls:"r", text:"Memory"}), el("th", {text:""})])]), el("tbody", {}, rows)])])];
+  if (k.checkpoint) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "Idle on ckpt across Hyak: " + k.checkpoint.idle_cpus + " CPUs, " + k.checkpoint.idle_gpus + " GPUs."}));
+  body("p-klone", nodes);
+  if (hoursSince(k.generated) > DAILY_STALE_H) issue("klone", "warn", "hyakalloc snapshot is " + ago(k.generated));
+}
+
+/* ---------- summary ---------- */
+var STRIP = [["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Logbook","#p-log"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
+function paintSummary(){
+  var strip = $("#strip");
+  strip.replaceChildren.apply(strip, STRIP.map(function(s){
+    var st = state[s[0]] || {lv:"unk", note:"no data"};
+    var lbl = {ok:"OK", warn:"Check", bad:"Problem", unk:"Unknown"}[st.lv];
+    return el("a", {cls:"light", href:s[1], "data-s":st.lv}, [el("b", {text: s[0]}), el("span", {text: lbl + ": " + st.note})]);
+  }));
+  var order = {bad:0, warn:1};
+  var list = issues.slice().sort(function(a, b){ return order[a.lv] - order[b.lv]; });
+  var seen = {};
+  list = list.filter(function(i){ var k = i.sys + i.msg; if (seen[k]) return false; seen[k] = 1; return true; });
+  var ul = $("#attn");
+  ul.replaceChildren.apply(ul, list.map(function(i){ return el("li", {cls:i.lv}, [el("span", {cls:"who", text:i.sys}), el("span", {text:i.msg})]); }));
+  var nb = list.filter(function(i){ return i.lv === "bad"; }).length, nw = list.length - nb;
+  var v = $("#verdict");
+  if (!list.length){ v.textContent = "Everything looks fine."; v.className = "verdict ok"; }
+  else {
+    var parts = [];
+    if (nb) parts.push(nb + (nb === 1 ? " problem" : " problems"));
+    if (nw) parts.push(nw + (nw === 1 ? " thing to check" : " things to check"));
+    v.textContent = parts.join(" and ") + ".";
+    v.className = "verdict " + (nb ? "bad" : "warn");
+  }
+}
+
+/* ---------- load ---------- */
+var busy = false;
+function load(){
+  if (busy) return; busy = true;
+  $("#refresh").disabled = true;
+  state = {}; issues = [];
+  Promise.all([
+    settle(getJSON(STATUS_BASE + "external.json")),
+    settle(getJSON(STATUS_BASE + "internal.json")),
+    settle(getJSON(SENEYE_URL)),
+    settle(getShore("tanks.json")),
+    settle(getShore("webcam.json")),
+    settle(getShore("reports.json")),
+    settle(getShore("field-water.json")),
+    settle(getShore("logbook.json"))
+  ]).then(function(R){
+    var ext = R[0], int = R[1];
+    var jobs = [
+      function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
+      function(){ renderField(R[6]); }, function(){ renderLog(R[7]); },
+      function(){ renderHosts(ext, int); }, function(){ renderRaven(ext, int); },
+      function(){ renderGannet(ext); }, function(){ renderKlone(ext); }
+    ];
+    jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
+    paintSummary();
+    $("#checked").textContent = "Checked " + new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+  }).finally(function(){ busy = false; $("#refresh").disabled = false; });
+}
+$("#refresh").addEventListener("click", load);
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) load(); });
+setInterval(function(){ if (!document.hidden) load(); }, REFRESH_MS);
+load();
+})();
+</script>
+</body>
+</html>
