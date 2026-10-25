@@ -49,13 +49,6 @@ button:hover{border-color:var(--sea)}
 .light b{font-size:15px}
 .light span{font-size:13px;color:var(--muted)}
 
-/* attention list */
-.attn{margin:0 0 26px;padding:0;list-style:none;display:grid;gap:6px}
-.attn li{display:flex;gap:10px;align-items:baseline;padding:8px 12px;border-radius:6px;background:var(--warn-bg)}
-.attn li.bad{background:var(--bad-bg)}
-.attn li .who{font-weight:700;min-width:7.5em}
-.attn:empty{display:none}
-
 /* columns */
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 @media (max-width:860px){.cols{grid-template-columns:1fr}}
@@ -115,12 +108,11 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
   </header>
 
   <nav class="strip" id="strip" aria-label="System summary"></nav>
-  <ul class="attn" id="attn" aria-label="Needs attention"></ul>
 
   <div class="cols">
     <div>
       <h2>SHORE tank room <a href="http://ftr210.online" target="_blank" rel="noopener">ftr210.online</a></h2>
-      <p class="sub">Tankcam, the Seneye tank, field water and weekly checks.</p>
+      <p class="sub">Tankcam, the Seneye tank, water quality and field water.</p>
 
       <section class="panel" id="p-seneye">
         <h3>Seneye tank <span class="age" data-age></span></h3>
@@ -139,11 +131,6 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
       <section class="panel" id="p-field">
         <h3>Puget Sound water <span class="age" data-age></span></h3>
-        <div data-body><p class="muted">Loading…</p></div>
-      </section>
-
-      <section class="panel" id="p-log">
-        <h3>Tank room logbook <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
@@ -195,7 +182,7 @@ var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/s
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
-var HOST_STALE_H = 1.5, DAILY_STALE_H = 30, SENEYE_STALE_H = 1, WQ_STALE_D = 10, LOG_STALE_D = 7;
+var HOST_STALE_H = 1.5, DAILY_STALE_H = 30, SENEYE_STALE_H = 1, WQ_STALE_D = 10;
 var DISK_WARN = 85, DISK_BAD = 92, PART_WARN = 75, PART_BAD = 90;
 
 /* ---------- helpers ---------- */
@@ -361,24 +348,6 @@ function renderField(r){
   body("p-field", nodes);
 }
 
-function renderLog(r){
-  if (!r.ok){ fail("p-log", "SHORE data not reachable (" + r.e.message + ")."); mark("Logbook", "unk", "not reachable"); return; }
-  var d = r.v, last = d.last_entry;
-  setAge("p-log", d.updated_at, 6);
-  var nodes = [];
-  if (d.error) nodes.push(el("p", {cls:"err", text: "Logbook error: " + d.error}));
-  var weeks = (d.weeks || []).slice(-6);
-  nodes.push(el("p", {style:"margin:8px 0 6px"}, ["Last entry ", el("b", {text: last || "n/a"}), last ? " (" + ago(last + "T12:00:00").replace(" h ago"," hours ago") + ")" : "", "."]));
-  if (weeks.length){
-    var tb = weeks.map(function(w){ return el("tr", {}, [el("td", {text:"Week of " + w.week_of}), el("td", {cls:"r num", text: w.days_logged + " of 7 days"}), el("td", {style:"width:40%"}, [bar(w.days_logged / 7 * 100, w.days_logged >= 5 ? "ok" : w.days_logged >= 3 ? "warn" : "bad")])]); });
-    nodes.push(el("table", {}, [el("tbody", {}, tb)]));
-  }
-  body("p-log", nodes);
-  var h = last ? hoursSince(last + "T23:59:00") : null;
-  if (h != null && h > LOG_STALE_D * 24) issue("Logbook", "warn", "No tank room log entry since " + last);
-  else mark("Logbook", d.error ? "warn" : "ok", last ? "last " + last : "no entries");
-}
-
 /* ---------- Computing ---------- */
 function renderHosts(ext, int){
   var docs = [ext, int].filter(function(r){ return r.ok && r.v && r.v.hosts; }).map(function(r){ return r.v; });
@@ -478,7 +447,7 @@ function renderKlone(ext){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Logbook","#p-log"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
+var STRIP = [["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -490,8 +459,6 @@ function paintSummary(){
   var list = issues.slice().sort(function(a, b){ return order[a.lv] - order[b.lv]; });
   var seen = {};
   list = list.filter(function(i){ var k = i.sys + i.msg; if (seen[k]) return false; seen[k] = 1; return true; });
-  var ul = $("#attn");
-  ul.replaceChildren.apply(ul, list.map(function(i){ return el("li", {cls:i.lv}, [el("span", {cls:"who", text:i.sys}), el("span", {text:i.msg})]); }));
   var nb = list.filter(function(i){ return i.lv === "bad"; }).length, nw = list.length - nb;
   var v = $("#verdict");
   if (!list.length){ v.textContent = "Everything looks fine."; v.className = "verdict ok"; }
@@ -517,13 +484,12 @@ function load(){
     settle(getShore("tanks.json")),
     settle(getShore("webcam.json")),
     settle(getShore("reports.json")),
-    settle(getShore("field-water.json")),
-    settle(getShore("logbook.json"))
+    settle(getShore("field-water.json"))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
-      function(){ renderField(R[6]); }, function(){ renderLog(R[7]); },
+      function(){ renderField(R[6]); },
       function(){ renderHosts(ext, int); }, function(){ renderRaven(ext, int); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }
     ];
