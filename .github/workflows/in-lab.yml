@@ -1,14 +1,15 @@
 name: Scrape lab calendar
 
 # Pulls the public lab Google Calendar and publishes the next week's
-# "in lab" events to in-lab.json on the calendar-data branch.
+# "in lab" events to in-lab.json on the calendar-data branch, along with
+# claude.json (the last month of Claude Code commits across lab repos).
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/in_lab.py, .github/workflows/in-lab.yml]
+    paths: [scripts/in_lab.py, scripts/claude_activity.py, .github/workflows/in-lab.yml]
 
 permissions:
   contents: write
@@ -27,12 +28,16 @@ jobs:
           python-version: "3.12"
       - run: pip install icalendar recurring_ical_events
       - run: mkdir -p out && python scripts/in_lab.py out/in-lab.json
+      - run: python scripts/claude_activity.py out/claude.json
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Publish to calendar-data branch
         working-directory: out
         run: |
           git init -q -b calendar-data
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add in-lab.json
-          git commit -qm "Update in-lab.json"
+          git add -A
+          git commit -qm "Update in-lab.json and claude.json"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" calendar-data
