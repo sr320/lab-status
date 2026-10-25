@@ -197,6 +197,15 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
+
+    <div>
+      <h2>Conditioning Atlas <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">sr320.github.io/conditioning-atlas</a></h2>
+      <p class="sub">Priming windows, doses and persistence of induced environmental memory in marine invertebrates, one row per experiment.</p>
+      <section class="panel" id="p-atlas">
+        <h3>Atlas contents <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
   </div>
 
   <h2 id="github" style="margin-top:22px">RobertsLab on GitHub <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">github.com/RobertsLab</a></h2>
@@ -231,6 +240,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch, the
     <a href="https://sr320.github.io/AREE/" target="_blank" rel="noopener">AREE site</a>, the
     <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a>, the
+    <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a> and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
     A green host light only means it answered on the network.
@@ -259,6 +269,11 @@ var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/s
 var AREE_URL    = "https://sr320.github.io/AREE/dashboard/data.json";
 var WHALE_URL   = "https://robertslab.github.io/project-white-whale/data.json";
 var WHALE_STALE_H = 8;
+// The Conditioning Atlas publishes one self-contained page; its data and "built <date>" footer are read out of that page,
+// and the Last-Modified header says when GitHub Pages last deployed it. The commits API adds the latest commit on main.
+var ATLAS_PAGE_URL = "https://sr320.github.io/conditioning-atlas/";
+var ATLAS_COMMITS_URL = "https://api.github.com/repos/sr320/conditioning-atlas/commits?sha=main&per_page=1";
+var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -687,8 +702,70 @@ function renderWhale(r){
   mark("White Whale", "ok", t.in_progress + " in progress, " + summarized + " summarized");
 }
 
+/* ---------- Conditioning Atlas ---------- */
+function getAtlas(){
+  var u = ATLAS_PAGE_URL + "?t=" + Date.now();
+  return fetch(u, {cache:"no-store"}).then(function(r){
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var deployed = r.headers.get("Last-Modified");
+    return r.text().then(function(html){
+      var out = {deployed: deployed ? new Date(deployed).toISOString() : null, rows: null, experiments: null, papers: null, built: null};
+      // footer string is JSON-encoded inside the script, so the middle dots appear as ·
+      var m = /(\d+) experiments\b.{1,12}?(\d+) papers\b.{1,12}?built (\d{4}-\d{2}-\d{2})/.exec(html);
+      if (m){ out.experiments = +m[1]; out.papers = +m[2]; out.built = m[3]; }
+      var i = html.indexOf("const DATA = ");
+      if (i >= 0){
+        var j = html.indexOf("\n", i);
+        try { out.rows = JSON.parse(html.slice(i + 13, j < 0 ? undefined : j).replace(/;\s*$/, "")); } catch (e){ out.rows = null; }
+      }
+      if (out.rows == null && out.experiments == null) throw new Error("page layout not recognised");
+      return out;
+    });
+  });
+}
+function renderAtlas(r, c){
+  if (!r.ok){ fail("p-atlas", "Conditioning Atlas page not reachable (" + r.e.message + ")."); mark("Atlas", "unk", "site not reachable"); return; }
+  var d = r.v, rows = d.rows || [];
+  var commit = c && c.ok && c.v && c.v[0] ? c.v[0] : null;
+  // the deploy time is the most precise "last update"; fall back to the latest commit, then the build date in the footer
+  var updated = d.deployed || (commit ? commit.commit.committer.date : null) || (d.built ? d.built + "T12:00:00Z" : null);
+  setAge("p-atlas", updated, null);
+
+  var uniq = function(key){ var s = {}; rows.forEach(function(x){ if (x[key]) s[x[key]] = 1; }); return Object.keys(s).length; };
+  var count = function(key){ var m = {}; rows.forEach(function(x){ var k = x[key] || "not reported"; m[k] = (m[k] || 0) + 1; }); return Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(a, b){ return b[1] - a[1]; }); };
+  var n = function(x){ return x == null ? "—" : x.toLocaleString("en-US"); };
+  var experiments = rows.length || d.experiments, papers = d.papers != null ? d.papers : (rows.length ? uniq("doi") : null);
+
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Experiments", n(experiments)),
+    reading("Papers", n(papers)),
+    rows.length ? reading("Species", n(uniq("species"))) : null,
+    rows.length ? reading("Stressor classes", n(count("stressor_category").length)) : null
+  ])];
+  if (rows.length){
+    var taxa = count("taxon");
+    nodes.push(el("h4", {cls:"mini", text:"Experiments by taxon"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("tbody", {}, taxa.map(function(t){
+      return el("tr", {}, [el("td", {text: t[0]}), el("td", {style:"width:40%"}, [bar(t[1] / rows.length * 100, "ok")]), el("td", {cls:"r num", text: String(t[1])})]);
+    }))])]));
+  }
+  var when = [];
+  if (d.deployed) when.push("Site deployed " + new Date(d.deployed).toLocaleString([], {dateStyle:"medium", timeStyle:"short"}));
+  if (d.built) when.push("atlas built " + d.built);
+  if (when.length) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: when.join(", ") + "."}));
+  if (commit){
+    var cm = commit.commit, subject = String(cm.message || "").split("\n")[0];
+    nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:13px"}, [
+      "Last commit ", el("a", {href: commit.html_url || (ATLAS_REPO_URL + "/commit/" + commit.sha), target:"_blank", rel:"noopener", text: String(commit.sha).slice(0, 7)}),
+      " (" + ago(cm.committer.date) + "): " + subject
+    ]));
+  }
+  body("p-atlas", nodes);
+  mark("Atlas", "ok", experiments != null ? n(experiments) + " experiments, updated " + ago(updated) : "site up");
+}
+
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -736,7 +813,9 @@ function load(){
     settle(getJSON(CLAUDE_STATUS_URL)),
     settle(getJSON(CLAUDE_URL)),
     settle(getJSON(WHALE_URL)),
-    settle(getJSON(GITHUB_URL))
+    settle(getJSON(GITHUB_URL)),
+    settle(getAtlas()),
+    settle(getJSON(ATLAS_COMMITS_URL))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -745,7 +824,7 @@ function load(){
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
       function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
       function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
-      function(){ renderGitHub(R[13]); }
+      function(){ renderGitHub(R[13]); }, function(){ renderAtlas(R[14], R[15]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();

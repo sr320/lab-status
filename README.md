@@ -11,6 +11,7 @@ Everything is client-side in `index.html`. It pulls JSON at load and every 5 min
 - the SHORE site build (`/data/*.json` on ftr210.online or robertslab.github.io/shore-line)
 - status.claude.com's public Statuspage API (`/api/v2/summary.json`) for Claude service status
 - the AREE site's dashboard data (https://sr320.github.io/AREE/dashboard/data.json): the `kpis` block for study, evidence, candidate and harmonized-contrast counts, plus `commit` and `generated_at`.
+- the Conditioning Atlas page itself (https://sr320.github.io/conditioning-atlas/, which allows cross-origin reads): the embedded `DATA` array for experiment, paper, species and stressor counts, the "built <date>" footer, and the `Last-Modified` header for when GitHub Pages last deployed it; plus the latest commit on `main` from the GitHub commits API.
 - the Project White Whale dashboard's `data.json` (https://robertslab.github.io/project-white-whale/data.json), rebuilt every 3 hours; the light turns amber if it's more than 8 hours old or reports that branch claims or the gannet mirror couldn't be read.
 
 Thresholds (disk %, staleness hours) are constants near the top of the script.
