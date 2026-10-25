@@ -159,7 +159,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
     <div>
       <h2>Computing <a href="https://robertslab.github.io/resources/Computing-Hardware/" target="_blank" rel="noopener">Handbook page</a></h2>
-      <p class="sub">Network checks, raven's 5-minute snapshot, and the daily raven, gannet and klone reports.</p>
+      <p class="sub">Network checks, raven's 5-minute snapshot, and the daily klone report.</p>
 
       <section class="panel" id="p-hosts">
         <h3>Reachable? <span class="age" data-age></span></h3>
@@ -168,11 +168,6 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
       <section class="panel" id="p-ravenlive">
         <h3>raven right now <span class="age" data-age></span></h3>
-        <div data-body><p class="muted">Loading…</p></div>
-      </section>
-
-      <section class="panel" id="p-gannet">
-        <h3>gannet health <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
 
@@ -535,30 +530,6 @@ function renderHosts(ext, int, ravenLive){
   body("p-hosts", [el("table", {cls:"hosts"}, [el("tbody", {}, rows)])]);
 }
 
-function renderGannet(ext){
-  if (!ext.ok || !ext.v.gannet_stats){ fail("p-gannet", "No gannet health report in the status feed."); mark("gannet", "unk", "no report"); return; }
-  var g = ext.v.gannet_stats;
-  setAge("p-gannet", g.generated, DAILY_STALE_H);
-  var nodes = [];
-  var raid = g.raid || [], badRaid = raid.filter(function(x){ return !x.healthy; });
-  var mem = g.memory && g.memory.mem;
-  nodes.push(el("div", {cls:"readings"}, [
-    reading("RAID arrays healthy", (raid.length - badRaid.length) + " of " + raid.length),
-    reading("Uptime", (g.uptime || "n/a").split(",")[0]),
-    mem ? reading("Memory used", mem.used + " of " + mem.total) : null
-  ]));
-  var extra = [];
-  (g.kernel_errors || []).slice(0, 3).forEach(function(k){ extra.push(el("li", {}, [pill("bad", "kernel"), " " + (typeof k === "string" ? k : JSON.stringify(k))])); });
-  if (extra.length) nodes.push(el("ul", {cls:"plain"}, extra));
-  nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, [el("a", {href:"https://robertslab.github.io/resources/Gannet-Dashboard/", target:"_blank", rel:"noopener", text:"Full Gannet Dashboard"})]));
-  body("p-gannet", nodes);
-
-  badRaid.forEach(function(x){ issue("gannet", "bad", "RAID " + x.name + " is " + x.state + " (" + x.active + " of " + x.members + " active)"); });
-  if ((g.kernel_errors || []).length) issue("gannet", "warn", g.kernel_errors.length + " kernel error(s) in today's report");
-  if (hoursSince(g.generated) > DAILY_STALE_H) issue("gannet", "warn", "Health report is " + ago(g.generated));
-  mark("gannet", "ok", (raid.length - badRaid.length) + " of " + raid.length + " RAID healthy");
-}
-
 function renderKlone(ext){
   if (!ext.ok || !ext.v.hyak_stats){ fail("p-klone", "No hyakalloc snapshot in the status feed."); return; }
   var k = ext.v.hyak_stats, parts = k.partitions || [];
@@ -727,7 +698,7 @@ function renderWhale(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -778,7 +749,7 @@ function load(){
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
-      function(){ renderGannet(ext); }, function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
+      function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
       function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
       function(){ renderGitHub(R[13]); }
     ];
