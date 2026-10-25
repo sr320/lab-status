@@ -171,11 +171,6 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
         <div data-body><p class="muted">Loading…</p></div>
       </section>
 
-      <section class="panel" id="p-raven">
-        <h3>raven disks and CPU <span class="age" data-age></span></h3>
-        <div data-body><p class="muted">Loading…</p></div>
-      </section>
-
       <section class="panel" id="p-gannet">
         <h3>gannet health <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
@@ -272,7 +267,7 @@ var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
 var HOST_STALE_H = 1.5, DAILY_STALE_H = 30, SENEYE_STALE_H = 1, WQ_STALE_D = 10;
-var DISK_WARN = 85, DISK_BAD = 92, PART_WARN = 75, PART_BAD = 90;
+var PART_WARN = 75, PART_BAD = 90;
 
 /* ---------- helpers ---------- */
 function $(s, r){ return (r || document).querySelector(s); }
@@ -540,29 +535,6 @@ function renderHosts(ext, int, ravenLive){
   body("p-hosts", [el("table", {cls:"hosts"}, [el("tbody", {}, rows)])]);
 }
 
-function diskTable(disks, key){
-  var sorted = disks.slice().sort(function(a, b){ return b.use_percent - a.use_percent; });
-  var rows = sorted.map(function(d){
-    var lv = level(d.use_percent, DISK_WARN, DISK_BAD);
-    return el("tr", {}, [el("td", {text: d.mount}), el("td", {cls:"r num", text: (d.used || "") + " / " + (d.size || "")}), el("td", {style:"width:30%"}, [bar(d.use_percent, lv)]), el("td", {cls:"r num", text: d.use_percent + "%"})]);
-  });
-  return el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Mount"}), el("th", {cls:"r", text:"Used"}), el("th", {text:""}), el("th", {cls:"r", text:"Full"})])]), el("tbody", {}, rows)])]);
-}
-
-function renderRaven(ext, int){
-  var cands = [ext, int].filter(function(r){ return r.ok && r.v && r.v.raven_stats; }).map(function(r){ return r.v.raven_stats; });
-  if (!cands.length){ fail("p-raven", "No raven snapshot in the status feed."); mark("raven", "unk", "no snapshot"); return; }
-  var s = cands.sort(function(a, b){ return Date.parse(b.generated) - Date.parse(a.generated); })[0];
-  setAge("p-raven", s.generated, DAILY_STALE_H);
-  var disks = s.disks || [];
-  var nodes = [el("div", {cls:"readings"}, [reading("CPU load at snapshot", fmt(s.cpu_percent, 0), "%"), reading("Memory", fmt(s.memory_percent, 1), "%")])];
-  if (disks.length) nodes.push(diskTable(disks));
-  if (s.winners && s.winners.length) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "Top CPU users: " + s.winners.slice(0, 3).map(function(w){ return w.user; }).join(", ")}));
-  body("p-raven", nodes);
-  disks.forEach(function(d){ if (d.use_percent >= DISK_WARN) issue("raven", d.use_percent >= DISK_BAD ? "bad" : "warn", d.mount + " is " + d.use_percent + "% full"); });
-  if (hoursSince(s.generated) > DAILY_STALE_H) issue("raven", "warn", "Daily snapshot is " + ago(s.generated));
-}
-
 function renderGannet(ext){
   if (!ext.ok || !ext.v.gannet_stats){ fail("p-gannet", "No gannet health report in the status feed."); mark("gannet", "unk", "no report"); return; }
   var g = ext.v.gannet_stats;
@@ -755,7 +727,7 @@ function renderWhale(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -805,7 +777,7 @@ function load(){
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
-      function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); }, function(){ renderRaven(ext, int); },
+      function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
       function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
       function(){ renderGitHub(R[13]); }
