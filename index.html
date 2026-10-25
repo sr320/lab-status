@@ -633,12 +633,25 @@ function renderClaudeSpend(r){
   var week = d.daily.slice(-7).reduce(function(a, x){ return a + x[1]; }, 0);
   var max = Math.max.apply(null, d.daily.map(function(x){ return x[1]; }).concat([0.01]));
   var month = new Date(d.month + "-01T12:00:00Z").toLocaleString([], {month:"long", timeZone:"UTC"});
+  function split(title, head, rows, name){
+    if (!rows || !rows.length) return null;
+    return el("div", {cls:"scroll"}, [el("h4", {cls:"mini", text:title}), el("table", {}, [
+      el("thead", {}, [el("tr", {}, [el("th", {text:head}), el("th", {cls:"r", text:"Spend"}), el("th", {text:""}), el("th", {cls:"r", text:"Share"})])]),
+      el("tbody", {}, rows.map(function(x){
+        var pct = d.total ? x.usd / d.total * 100 : 0;
+        return el("tr", {}, [el("td", {text: name(x)}), el("td", {cls:"r num", text: usd(x.usd)}), el("td", {style:"width:30%"}, [bar(pct, "ok")]), el("td", {cls:"r num muted", text: Math.round(pct) + "%"})]);
+      }))])]);
+  }
+  // "claude-opus-5-5" -> "Opus 5.5"
+  function model(x){ var m = /^claude-([a-z]+)-(\d+)(?:-(\d))?/.exec(x.model); return m ? m[1][0].toUpperCase() + m[1].slice(1) + " " + m[2] + (m[3] ? "." + m[3] : "") : x.model; }
   body("p-cspend", [
     el("div", {cls:"readings"}, [reading("Spent in " + month, usd(d.total)), reading("Last 7 days", usd(week)), reading("Today (UTC)", usd(d.daily[d.daily.length - 1][1]))]),
     el("div", {cls:"cbars", role:"img", "aria-label":"API spend per day"}, d.daily.map(function(x){
       var b = el("i", {title: x[0] + ": " + usd(x[1])}); b.style.height = (x[1] / max * 100) + "%"; return b;
     })),
-    el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, ["Claude Console (API) usage from the Admin API cost report; Team plan seats aren't included. ", el("a", {href:"https://platform.claude.com/settings/billing", target:"_blank", rel:"noopener", text:"Credit balance"}), " is only in the Console."])
+    split("By model", "Model", d.models, model),
+    split("By API key (estimated)", "Key", d.keys, function(x){ return x.key; }),
+    el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, ["Claude Console (API) usage from the Admin API cost report; Team plan seats aren't included. Per-key spend shares each model's cost by token counts, since the cost report can't split by key. ", el("a", {href:"https://platform.claude.com/settings/billing", target:"_blank", rel:"noopener", text:"Credit balance"}), " is only in the Console."])
   ]);
 }
 
