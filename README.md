@@ -11,6 +11,7 @@ Everything is client-side in `index.html`. It pulls JSON at load and every 5 min
 - the SHORE site build (`/data/*.json` on ftr210.online or robertslab.github.io/shore-line)
 - status.claude.com's public Statuspage API (`/api/v2/summary.json`) for Claude service status
 - the AREE results page (https://sr320.github.io/AREE-co/), fetched as HTML and parsed for its stat tiles and the "Real-study progress" table (GitHub Pages allows cross-origin reads). If that page's layout changes, the panel says so instead of guessing.
+- the Project White Whale dashboard's `data.json` (https://robertslab.github.io/project-white-whale/data.json), rebuilt every 3 hours; the light turns amber if it's more than 8 hours old or reports that branch claims or the gannet mirror couldn't be read.
 
 Thresholds (disk %, staleness hours) are constants near the top of the script.
 

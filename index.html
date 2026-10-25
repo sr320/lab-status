@@ -188,12 +188,25 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     </div>
   </div>
 
-  <h2 style="margin-top:14px">AREE <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">sr320.github.io/AREE-co</a></h2>
-  <p class="sub">Aquaculture Resilience Evidence Engine: progress reanalysing public Pacific oyster RNA-seq studies.</p>
-  <section class="panel" id="p-aree">
-    <h3>Results to date <span class="age" data-age></span></h3>
-    <div data-body><p class="muted">Loading…</p></div>
-  </section>
+  <div class="cols" style="margin-top:14px">
+    <div>
+      <h2>AREE <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">sr320.github.io/AREE-co</a></h2>
+      <p class="sub">Aquaculture Resilience Evidence Engine: progress reanalysing public Pacific oyster RNA-seq studies.</p>
+      <section class="panel" id="p-aree">
+        <h3>Results to date <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+
+    <div>
+      <h2>White Whale <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">project-white-whale</a></h2>
+      <p class="sub">Every public Pacific oyster methylome, reprocessed from raw reads on one reference genome.</p>
+      <section class="panel" id="p-whale">
+        <h3>Pipeline progress <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+  </div>
 
   <h2 id="claude" style="margin-top:22px">Claude <a href="https://claude.ai/analytics/claude-code" target="_blank" rel="noopener">Team analytics (admins)</a></h2>
   <p class="sub">Anthropic's service status, and Claude Code commits across lab repos.</p>
@@ -212,7 +225,8 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     Refreshes every 5 minutes while open. Data comes from the SHORE site build, the
     <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch, the
     <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch, the
-    <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE site</a> and
+    <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE site</a>, the
+    <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a> and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
     A green host light only means it answered on the network.
   </footer>
@@ -237,6 +251,8 @@ var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seney
 // plain http only works when this file is opened locally or over http.
 var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/shore-line/data/","http://ftr210.online/data/"];
 var AREE_URL    = "https://sr320.github.io/AREE-co/";
+var WHALE_URL   = "https://robertslab.github.io/project-white-whale/data.json";
+var WHALE_STALE_H = 8;
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -670,8 +686,51 @@ function renderClaudeActivity(r){
   body("p-cactivity", nodes);
 }
 
+/* ---------- White Whale ---------- */
+function renderWhale(r){
+  if (!r.ok){ fail("p-whale", "White Whale data.json not reachable (" + r.e.message + ")."); mark("White Whale", "unk", "site not reachable"); return; }
+  var d = r.v, t = d.totals || {}, bs = t.by_stage || {}, stages = d.stages || [];
+  setAge("p-whale", d.generated_at, WHALE_STALE_H);
+  var summarized = (bs.summarized || 0) + (bs.merged || 0);
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Studies in the backlog", String(t.backlog), fmt(t.backlog_gb / 1000, 1) + " TB"),
+    reading("In progress", String(t.in_progress)),
+    reading("Summarized", String(summarized), "of " + t.backlog),
+    reading("Merged", String(bs.merged || 0)),
+    reading("FASTQ on gannet", fmt(t.mirrored_gb, 0), "GB")
+  ])];
+  var active = (d.studies || []).filter(function(s){ return s.stage_index != null; })
+    .sort(function(a, b){ return b.stage_index - a.stage_index || String(b.updated).localeCompare(String(a.updated)); });
+  if (active.length){
+    nodes.push(el("h4", {cls:"mini", text:"Active studies"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Study"}), el("th", {text:"Stage"}), el("th", {text:""}), el("th", {text:"Machine"}), el("th", {cls:"r", text:"Updated"})])]),
+      el("tbody", {}, active.map(function(s){
+        var name = s.study_id || s.accession, st = stages[s.stage_index];
+        return el("tr", {}, [
+          el("td", {}, [s.branch_url ? el("a", {href: s.branch_url, target:"_blank", rel:"noopener", text: name}) : name]),
+          el("td", {title: st ? st.label : "", style:"white-space:nowrap", text: String(s.stage).replace(/_/g, " ")}),
+          el("td", {style:"width:22%"}, [bar((s.stage_index + 1) / (stages.length || 8) * 100, "ok")]),
+          el("td", {text: s.machine || ""}),
+          el("td", {cls:"r num muted", style:"white-space:nowrap", text: s.updated || ""})
+        ]);
+      }))])]));
+  }
+  var f = (d.findings || [])[0];
+  if (f){
+    nodes.push(el("h4", {cls:"mini", text:"Latest finding (" + f.date + ")"}));
+    nodes.push(el("p", {style:"margin:4px 0 0;font-size:14px"}, [f.link ? el("a", {href: f.link, target:"_blank", rel:"noopener", text: f.title}) : f.title,
+      f.status ? el("span", {cls:"muted", text: " · " + f.status}) : null]));
+  }
+  body("p-whale", nodes);
+  var h = hoursSince(d.generated_at);
+  if (h != null && h > WHALE_STALE_H) issue("White Whale", "warn", "Dashboard data is " + ago(d.generated_at) + " (rebuilt every 3 h)");
+  if (d.claims_available === false) issue("White Whale", "warn", "Study-branch claims could not be read");
+  if (d.mirror_available === false) issue("White Whale", "warn", "gannet mirror could not be read");
+  mark("White Whale", "ok", t.in_progress + " in progress, " + summarized + " summarized");
+}
+
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -713,7 +772,8 @@ function load(){
     settle(getRavenLive()),
     settle(getAREE()),
     settle(getJSON(CLAUDE_STATUS_URL)),
-    settle(getJSON(CLAUDE_URL))
+    settle(getJSON(CLAUDE_URL)),
+    settle(getJSON(WHALE_URL))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -721,7 +781,7 @@ function load(){
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); }, function(){ renderRaven(ext, int); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
-      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }
+      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
