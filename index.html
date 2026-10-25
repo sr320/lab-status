@@ -493,7 +493,7 @@ function renderRavenLive(r){
   if (d.processes && d.processes.length){
     nodes.push(el("h4", {cls:"mini", text:"Top processes"}));
     nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"User"}), el("th", {text:"Process"}), el("th", {cls:"r", text:"CPU"}), el("th", {cls:"r", text:"Mem"}), el("th", {cls:"r", text:"Running"})])]),
-      el("tbody", {}, d.processes.map(function(p){ return el("tr", {}, [el("td", {text:p.user}), el("td", {text:p.name}), el("td", {cls:"r num", text: fmt(p.cpu, 0) + "%"}), el("td", {cls:"r num", text: gib(p.rss_bytes)}), el("td", {cls:"r num muted", text: dur(p.running_s)})]); }))])]));
+      el("tbody", {}, d.processes.slice(0, 4).map(function(p){ return el("tr", {}, [el("td", {text:p.user}), el("td", {text:p.name}), el("td", {cls:"r num", text: fmt(p.cpu, 0) + "%"}), el("td", {cls:"r num", text: gib(p.rss_bytes)}), el("td", {cls:"r num muted", text: dur(p.running_s)})]); }))])]));
   }
   nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: d.tasks + " tasks, up " + dur(d.uptime_s) + ". Raven pushes a snapshot every 5 minutes; CPU is sampled over 2 seconds, and 100% is one full core."}));
   body("p-ravenlive", nodes);
