@@ -105,6 +105,8 @@ h4.mini{font-size:13px;color:var(--muted);margin:14px 0 0}
 .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
 ul.plain{list-style:none;margin:8px 0 0;padding:0;font-size:14px}
 ul.plain li{padding:4px 0;border-bottom:1px solid var(--line)} ul.plain li:last-child{border:0}
+.cbars{display:flex;align-items:flex-end;gap:2px;height:46px;margin-top:8px}
+.cbars i{flex:1;background:var(--sea);border-radius:2px 2px 0 0;min-height:1px;opacity:.85}
 footer{margin-top:30px;color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:no-preference){.light,.pill{transition:border-color .3s,background .3s}}
 </style>
@@ -186,10 +188,32 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     </div>
   </div>
 
+  <h2 style="margin-top:14px">AREE <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">sr320.github.io/AREE-co</a></h2>
+  <p class="sub">Aquaculture Resilience Evidence Engine: progress reanalysing public Pacific oyster RNA-seq studies.</p>
+  <section class="panel" id="p-aree">
+    <h3>Results to date <span class="age" data-age></span></h3>
+    <div data-body><p class="muted">Loading…</p></div>
+  </section>
+
+  <h2 id="claude" style="margin-top:22px">Claude <a href="https://claude.ai/analytics/claude-code" target="_blank" rel="noopener">Team analytics (admins)</a></h2>
+  <p class="sub">Anthropic's service status, and Claude Code commits across lab repos.</p>
+  <div class="cols">
+    <section class="panel" id="p-cstatus">
+      <h3>Claude service status <span class="age" data-age></span></h3>
+      <div data-body><p class="muted">Loading…</p></div>
+    </section>
+    <section class="panel" id="p-cactivity">
+      <h3>Claude Code commits, last 30 days <span class="age" data-age></span></h3>
+      <div data-body><p class="muted">Loading…</p></div>
+    </section>
+  </div>
+
   <footer>
     Refreshes every 5 minutes while open. Data comes from the SHORE site build, the
-    <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch and the
-    <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch.
+    <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch, the
+    <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch, the
+    <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE site</a> and
+    <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
     A green host light only means it answered on the network.
   </footer>
 </div>
@@ -205,11 +229,14 @@ var RAVEN_LIVE_API = "https://api.github.com/repos/sr320/lab-status/contents/rav
 var RAVEN_LIVE_RAW = "https://raw.githubusercontent.com/sr320/lab-status/raven-live/raven-live.json";
 var RAVEN_LIVE_STALE_MIN = 15;
 var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
+var CLAUDE_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/claude.json";
+var CLAUDE_STATUS_URL = "https://status.claude.com/api/v2/summary.json";
 var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
 var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
 // The SHORE site build publishes its JSON next to the page. Try HTTPS first;
 // plain http only works when this file is opened locally or over http.
 var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/shore-line/data/","http://ftr210.online/data/"];
+var AREE_URL    = "https://sr320.github.io/AREE-co/";
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -551,8 +578,100 @@ function renderKlone(ext){
   if (hoursSince(k.generated) > DAILY_STALE_H) issue("klone", "warn", "hyakalloc snapshot is " + ago(k.generated));
 }
 
+/* ---------- AREE ---------- */
+function getAREE(){
+  return fetch(AREE_URL + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var lm = r.headers.get("Last-Modified");
+    return r.text().then(function(t){ return {doc: new DOMParser().parseFromString(t, "text/html"), lastMod: lm}; });
+  });
+}
+
+function renderAREE(r){
+  if (!r.ok){ fail("p-aree", "AREE site not reachable (" + r.e.message + ")."); mark("AREE", "unk", "site not reachable"); return; }
+  var doc = r.v.doc, txt = function(n){ return n ? n.textContent.replace(/\s+/g, " ").trim() : ""; };
+  var stats = Array.prototype.map.call(doc.querySelectorAll(".stats .stat"), function(s){ return [txt(s.querySelector(".stat-label")), txt(s.querySelector(".stat-value"))]; });
+  var updated = Array.prototype.filter.call(doc.querySelectorAll("p"), function(p){ return /^Last updated from commit/.test(txt(p)); })[0];
+  var bm = updated && txt(updated).match(/site built (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC/);
+  var built = bm ? bm[1] + "T" + bm[2] + ":00Z" : (r.v.lastMod ? new Date(r.v.lastMod).toISOString() : null);
+  setAge("p-aree", built, null);
+
+  var table = doc.querySelector("#real-study-progress table"), studies = [];
+  if (table){
+    var heads = Array.prototype.map.call(table.querySelectorAll("thead th"), txt);
+    var iS = heads.indexOf("Study"), iX = heads.indexOf("Stressor / phenotype"), iA = heads.indexOf("Analysis status");
+    studies = Array.prototype.map.call(table.querySelectorAll("tbody tr"), function(tr){
+      var td = tr.querySelectorAll("td"), a = td[0] && td[td.length - 1].querySelector("a");
+      return {id: txt(td[iS]), stress: txt(td[iX]), status: txt(td[iA]), href: a ? new URL(a.getAttribute("href"), AREE_URL).href : null};
+    });
+  }
+  if (!stats.length && !studies.length){ fail("p-aree", "AREE page loaded but its layout wasn't recognised."); mark("AREE", "unk", "page layout changed"); return; }
+
+  var nodes = [el("div", {cls:"readings"}, stats.map(function(s){ return reading(s[0], s[1]); }))];
+  var done = studies.filter(function(s){ return /\bharmonized\b/.test(s.status) && !/not harmonized/.test(s.status); });
+  var pending = studies.filter(function(s){ return done.indexOf(s) < 0; });
+  if (studies.length){
+    var pct = done.length / studies.length * 100;
+    nodes.push(el("h4", {cls:"mini", text: done.length + " of " + studies.length + " contrasts harmonized"}));
+    nodes.push(bar(pct, "ok"));
+  }
+  if (pending.length){
+    nodes.push(el("h4", {cls:"mini", text:"Not yet harmonized"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Study"}), el("th", {text:"Stressor / phenotype"}), el("th", {text:"Status"})])]),
+      el("tbody", {}, pending.map(function(s){
+        return el("tr", {}, [el("td", {}, [s.href ? el("a", {href: s.href, target:"_blank", rel:"noopener", text: s.id}) : s.id]), el("td", {cls:"muted", text: s.stress}), el("td", {text: s.status.replace(/^raw /, "")})]);
+      }))])]));
+  }
+  if (updated) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: txt(updated)}));
+  body("p-aree", nodes);
+  mark("AREE", "ok", studies.length ? done.length + "/" + studies.length + " harmonized" : "site up");
+}
+
+/* ---------- Claude ---------- */
+var CLAUDE_PARTS = ["claude.ai", "Claude Code", "Claude API (api.anthropic.com)"];
+var IMPACT = {none:"ok", minor:"warn", major:"bad", critical:"bad"};
+var COMPONENT = {operational:["ok","operational"], degraded_performance:["warn","degraded"], partial_outage:["bad","partial outage"], major_outage:["bad","outage"], under_maintenance:["warn","maintenance"]};
+
+function renderClaudeStatus(r){
+  if (!r.ok){ fail("p-cstatus", "status.claude.com not reachable (" + r.e.message + ")."); mark("Claude", "unk", "status not reachable"); return; }
+  var d = r.v, lv = IMPACT[d.status.indicator] || "unk";
+  setAge("p-cstatus", d.page.updated_at);
+  var rows = (d.components || []).filter(function(c){ return CLAUDE_PARTS.indexOf(c.name) >= 0; }).map(function(c){
+    var st = COMPONENT[c.status] || ["unk", c.status.replace(/_/g, " ")];
+    return el("tr", {}, [el("td", {}, [el("span", {cls:"dot " + (st[0] === "unk" ? "" : st[0])}), c.name.replace(" (api.anthropic.com)", "")]), el("td", {}, [pill(st[0], st[1])])]);
+  });
+  var nodes = [el("p", {style:"margin:8px 0 0"}, [pill(lv, d.status.description)]), el("table", {cls:"hosts"}, [el("tbody", {}, rows)])];
+  var inc = (d.incidents || []).concat((d.scheduled_maintenances || []).filter(function(m){ return m.status === "in_progress"; }));
+  if (inc.length) nodes.push(el("ul", {cls:"plain"}, inc.map(function(i){
+    return el("li", {}, [pill(IMPACT[i.impact] || "warn", i.status.replace(/_/g, " ")), " ", el("a", {href: i.shortlink, target:"_blank", rel:"noopener", text: i.name})]);
+  })));
+  nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, [el("a", {href:"https://status.claude.com", target:"_blank", rel:"noopener", text:"status.claude.com"})]));
+  body("p-cstatus", nodes);
+  if (lv !== "ok") issue("Claude", lv, "Anthropic reports: " + (inc[0] ? inc[0].name : d.status.description));
+  else mark("Claude", "ok", "all systems operational");
+}
+
+function renderClaudeActivity(r){
+  if (!r.ok){ fail("p-cactivity", "No Claude commit summary yet (" + r.e.message + ")."); return; }
+  var d = r.v, week = (d.daily || []).slice(-7).reduce(function(a, x){ return a + x[1]; }, 0);
+  setAge("p-cactivity", d.updated_at, 1);
+  var max = Math.max.apply(null, d.daily.map(function(x){ return x[1]; }).concat([1]));
+  var nodes = [el("div", {cls:"readings"}, [reading("Commits, 30 days", String(d.total)), reading("Last 7 days", String(week)), reading("People", String(d.people.length))]),
+    el("div", {cls:"cbars", role:"img", "aria-label":"Claude Code commits per day"}, d.daily.map(function(x){
+      var b = el("i", {title: x[0] + ": " + x[1] + " commit" + (x[1] === 1 ? "" : "s")}); b.style.height = (x[1] / max * 100) + "%"; return b;
+    }))];
+  if (d.people.length) nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [
+    el("thead", {}, [el("tr", {}, [el("th", {text:"Who"}), el("th", {cls:"r", text:"7 d"}), el("th", {cls:"r", text:"30 d"}), el("th", {text:"Most in"})])]),
+    el("tbody", {}, d.people.map(function(p){
+      return el("tr", {}, [el("td", {text:p.name}), el("td", {cls:"r num", text:String(p.commits_7d)}), el("td", {cls:"r num", text:String(p.commits)}),
+        el("td", {}, [el("a", {href:"https://github.com/" + p.top_repo, target:"_blank", rel:"noopener", text:p.top_repo.split("/")[1]}), p.repos > 1 ? el("span", {cls:"muted", text:" +" + (p.repos - 1) + " more"}) : null])]);
+    }))])]));
+  nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "Public commits with Claude Code's “Co-Authored-By: Claude” line in " + d.scopes.map(function(s){ return s.split(":")[1]; }).join(" and ") + " repos. The Team plan has no usage API, so tokens and spend are only on the admin analytics page."}));
+  body("p-cactivity", nodes);
+}
+
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"],["AREE","#p-aree"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -591,14 +710,18 @@ function load(){
     settle(getShore("reports.json")),
     settle(getShore("field-water.json")),
     settle(getJSON(INLAB_URL)),
-    settle(getRavenLive())
+    settle(getRavenLive()),
+    settle(getAREE()),
+    settle(getJSON(CLAUDE_STATUS_URL)),
+    settle(getJSON(CLAUDE_URL))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); }, function(){ renderRaven(ext, int); },
-      function(){ renderGannet(ext); }, function(){ renderKlone(ext); }
+      function(){ renderGannet(ext); }, function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
+      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
