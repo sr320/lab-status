@@ -208,6 +208,19 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     </div>
   </div>
 
+  <h2 id="github" style="margin-top:22px">RobertsLab on GitHub <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">github.com/RobertsLab</a></h2>
+  <p class="sub">Commits to the main branch of lab repos over the last week, leaving out bots and data branches.</p>
+  <div class="cols">
+    <section class="panel" id="p-ghrepos">
+      <h3>Active repos, last 7 days <span class="age" data-age></span></h3>
+      <div data-body><p class="muted">Loading…</p></div>
+    </section>
+    <section class="panel" id="p-ghrecent">
+      <h3>Latest commits <span class="age" data-age></span></h3>
+      <div data-body><p class="muted">Loading…</p></div>
+    </section>
+  </div>
+
   <h2 id="claude" style="margin-top:22px">Claude <a href="https://claude.ai/analytics/claude-code" target="_blank" rel="noopener">Team analytics (admins)</a></h2>
   <p class="sub">Anthropic's service status, and Claude Code commits across lab repos.</p>
   <div class="cols">
@@ -226,7 +239,8 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch, the
     <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch, the
     <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE site</a>, the
-    <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a> and
+    <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a>, the
+    <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a> and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
     A green host light only means it answered on the network.
   </footer>
@@ -244,6 +258,7 @@ var RAVEN_LIVE_RAW = "https://raw.githubusercontent.com/sr320/lab-status/raven-l
 var RAVEN_LIVE_STALE_MIN = 15;
 var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
 var CLAUDE_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/claude.json";
+var GITHUB_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/github.json";
 var CLAUDE_STATUS_URL = "https://status.claude.com/api/v2/summary.json";
 var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
 var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
@@ -635,6 +650,24 @@ function renderAREE(r){
   mark("AREE", "ok", studies.length ? done.length + "/" + studies.length + " harmonized" : "site up");
 }
 
+/* ---------- GitHub ---------- */
+function renderGitHub(r){
+  if (!r.ok){ fail("p-ghrepos", "No GitHub activity summary yet (" + r.e.message + ")."); fail("p-ghrecent", "No GitHub activity summary yet."); return; }
+  var d = r.v;
+  setAge("p-ghrepos", d.updated_at, 1); setAge("p-ghrecent", d.updated_at, 1);
+  var nodes = [el("div", {cls:"readings"}, [reading("Commits", String(d.total)), reading("Repos", String(d.repos.length)), reading("People", String(d.people.length))])];
+  if (d.repos.length) nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [
+    el("thead", {}, [el("tr", {}, [el("th", {text:"Repo"}), el("th", {cls:"r", text:"Commits"}), el("th", {text:"Who"}), el("th", {cls:"r", text:"Last"})])]),
+    el("tbody", {}, d.repos.map(function(x){
+      return el("tr", {}, [el("td", {}, [el("a", {href:x.url, target:"_blank", rel:"noopener", text:x.repo})]), el("td", {cls:"r num", text:String(x.commits)}),
+        el("td", {cls:"muted", text:x.people.join(", ")}), el("td", {cls:"r num muted", text:ago(x.last_at)})]);
+    }))])]));
+  body("p-ghrepos", nodes);
+  body("p-ghrecent", d.recent.length ? [el("ul", {cls:"plain"}, d.recent.map(function(c){
+    return el("li", {}, [el("a", {href:c.url, target:"_blank", rel:"noopener", text:c.msg}), el("div", {cls:"muted", style:"font-size:13px", text: c.who + " in " + c.repo + " · " + ago(c.at)})]);
+  }))] : [el("p", {cls:"muted", text:"No commits in the last week."})]);
+}
+
 /* ---------- Claude ---------- */
 var CLAUDE_PARTS = ["claude.ai", "Claude Code", "Claude API (api.anthropic.com)"];
 var IMPACT = {none:"ok", minor:"warn", major:"bad", critical:"bad"};
@@ -765,7 +798,8 @@ function load(){
     settle(getAREE()),
     settle(getJSON(CLAUDE_STATUS_URL)),
     settle(getJSON(CLAUDE_URL)),
-    settle(getJSON(WHALE_URL))
+    settle(getJSON(WHALE_URL)),
+    settle(getJSON(GITHUB_URL))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -773,7 +807,8 @@ function load(){
       function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); }, function(){ renderRaven(ext, int); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
-      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); }
+      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
+      function(){ renderGitHub(R[13]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
