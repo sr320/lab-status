@@ -465,9 +465,7 @@ function renderGannet(ext){
     reading("Uptime", (g.uptime || "n/a").split(",")[0]),
     mem ? reading("Memory used", mem.used + " of " + mem.total) : null
   ]));
-  if (disks.length) nodes.push(diskTable(disks));
   var extra = [];
-  (g.failed_units || []).forEach(function(u){ extra.push(el("li", {}, [pill("warn", "failed service"), " " + (u.description || u.unit)])); });
   (g.kernel_errors || []).slice(0, 3).forEach(function(k){ extra.push(el("li", {}, [pill("bad", "kernel"), " " + (typeof k === "string" ? k : JSON.stringify(k))])); });
   if (extra.length) nodes.push(el("ul", {cls:"plain"}, extra));
   nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, [el("a", {href:"https://robertslab.github.io/resources/Gannet-Dashboard/", target:"_blank", rel:"noopener", text:"Full Gannet Dashboard"})]));
@@ -475,7 +473,6 @@ function renderGannet(ext){
 
   disks.forEach(function(d){ if (d.use_percent >= DISK_WARN) issue("gannet", d.use_percent >= DISK_BAD ? "bad" : "warn", d.mount + " is " + d.use_percent + "% full"); });
   badRaid.forEach(function(x){ issue("gannet", "bad", "RAID " + x.name + " is " + x.state + " (" + x.active + " of " + x.members + " active)"); });
-  (g.failed_units || []).forEach(function(u){ issue("gannet", "warn", "Service failed: " + (u.description || u.unit)); });
   if ((g.kernel_errors || []).length) issue("gannet", "warn", g.kernel_errors.length + " kernel error(s) in today's report");
   if (hoursSince(g.generated) > DAILY_STALE_H) issue("gannet", "warn", "Health report is " + ago(g.generated));
 }
