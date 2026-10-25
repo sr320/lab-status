@@ -275,6 +275,8 @@ function el(tag, attrs, kids){
   var n = document.createElement(tag);
   if (attrs) for (var k in attrs){
     if (k === "text") n.textContent = attrs[k];
+    // links come from outside feeds, so only http(s) and in-page anchors are allowed (no javascript: etc.)
+    else if (k === "href" && !/^(https?:\/\/|#)/i.test(String(attrs[k]))) continue;
     else if (k === "cls") n.className = attrs[k];
     else if (attrs[k] != null) n.setAttribute(k, attrs[k]);
   }

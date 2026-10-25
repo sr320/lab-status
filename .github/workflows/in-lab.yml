@@ -23,6 +23,8 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    # ANTHROPIC_ADMIN_KEY lives in this environment, which only main can use
+    environment: admin-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
