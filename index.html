@@ -212,7 +212,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
   </div>
 
   <h2 id="claude" style="margin-top:22px">Claude <a href="https://claude.ai/analytics/claude-code" target="_blank" rel="noopener">Team analytics (admins)</a></h2>
-  <p class="sub">Anthropic's service status, and Claude Code commits across lab repos.</p>
+  <p class="sub">Anthropic's service status, Claude Code commits across lab repos, and this month's API spend.</p>
   <div class="cols">
     <section class="panel" id="p-cstatus">
       <h3>Claude service status <span class="age" data-age></span></h3>
@@ -220,6 +220,10 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     </section>
     <section class="panel" id="p-cactivity">
       <h3>Claude Code commits, last 30 days <span class="age" data-age></span></h3>
+      <div data-body><p class="muted">Loading…</p></div>
+    </section>
+    <section class="panel" id="p-cspend">
+      <h3>API spend this month <span class="age" data-age></span></h3>
       <div data-body><p class="muted">Loading…</p></div>
     </section>
   </div>
@@ -249,6 +253,7 @@ var RAVEN_LIVE_STALE_MIN = 15;
 var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
 var CLAUDE_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/claude.json";
 var GITHUB_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/github.json";
+var CLAUDE_SPEND_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/claude-spend.json";
 var CLAUDE_STATUS_URL = "https://status.claude.com/api/v2/summary.json";
 var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
 var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
@@ -621,6 +626,22 @@ function renderClaudeStatus(r){
   else mark("Claude", "ok", "all systems operational");
 }
 
+function renderClaudeSpend(r){
+  if (!r.ok){ body("p-cspend", [el("p", {cls:"muted", text:"No spend data yet. It needs an Admin API key (sk-ant-admin…) saved as the ANTHROPIC_ADMIN_KEY secret on sr320/lab-status."})]); setAge("p-cspend", null); return; }
+  var d = r.v, usd = function(x){ return "$" + Number(x).toFixed(2); };
+  setAge("p-cspend", d.updated_at, 1);
+  var week = d.daily.slice(-7).reduce(function(a, x){ return a + x[1]; }, 0);
+  var max = Math.max.apply(null, d.daily.map(function(x){ return x[1]; }).concat([0.01]));
+  var month = new Date(d.month + "-01T12:00:00Z").toLocaleString([], {month:"long", timeZone:"UTC"});
+  body("p-cspend", [
+    el("div", {cls:"readings"}, [reading("Spent in " + month, usd(d.total)), reading("Last 7 days", usd(week)), reading("Today (UTC)", usd(d.daily[d.daily.length - 1][1]))]),
+    el("div", {cls:"cbars", role:"img", "aria-label":"API spend per day"}, d.daily.map(function(x){
+      var b = el("i", {title: x[0] + ": " + usd(x[1])}); b.style.height = (x[1] / max * 100) + "%"; return b;
+    })),
+    el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, ["Claude Console (API) usage from the Admin API cost report; Team plan seats aren't included. ", el("a", {href:"https://platform.claude.com/settings/billing", target:"_blank", rel:"noopener", text:"Credit balance"}), " is only in the Console."])
+  ]);
+}
+
 function renderClaudeActivity(r){
   if (!r.ok){ fail("p-cactivity", "No Claude commit summary yet (" + r.e.message + ")."); return; }
   var d = r.v, week = (d.daily || []).slice(-7).reduce(function(a, x){ return a + x[1]; }, 0);
@@ -728,7 +749,8 @@ function load(){
     settle(getJSON(CLAUDE_STATUS_URL)),
     settle(getJSON(CLAUDE_URL)),
     settle(getJSON(WHALE_URL)),
-    settle(getJSON(GITHUB_URL))
+    settle(getJSON(GITHUB_URL)),
+    settle(getJSON(CLAUDE_SPEND_URL))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -737,7 +759,7 @@ function load(){
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
       function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
       function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
-      function(){ renderGitHub(R[13]); }
+      function(){ renderGitHub(R[13]); }, function(){ renderClaudeSpend(R[14]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();

@@ -3,14 +3,15 @@ name: Scrape lab calendar
 # Pulls the public lab Google Calendar and publishes the next week's
 # "in lab" events to in-lab.json on the calendar-data branch, along with
 # claude.json (the last month of Claude Code commits across lab repos) and
-# github.json (the last week of commits to RobertsLab repos).
+# github.json (the last week of commits to RobertsLab repos) and
+# claude-spend.json (this month's API spend, when an admin key is set).
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, .github/workflows/in-lab.yml]
+    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, scripts/claude_spend.py, .github/workflows/in-lab.yml]
 
 permissions:
   contents: write
@@ -37,6 +38,10 @@ jobs:
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - run: python scripts/claude_spend.py out/claude-spend.json
+        continue-on-error: true
+        env:
+          ANTHROPIC_ADMIN_KEY: ${{ secrets.ANTHROPIC_ADMIN_KEY }}
       - name: Publish to calendar-data branch
         working-directory: out
         run: |
@@ -44,5 +49,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -qm "Update in-lab.json, claude.json and github.json"
+          git commit -qm "Update lab-status data"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" calendar-data
