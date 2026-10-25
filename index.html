@@ -180,8 +180,8 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
   <div class="cols" style="margin-top:14px">
     <div>
-      <h2>AREE <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">sr320.github.io/AREE-co</a></h2>
-      <p class="sub">Aquaculture Resilience Evidence Engine: progress reanalysing public Pacific oyster RNA-seq studies.</p>
+      <h2>AREE <a href="https://sr320.github.io/AREE/" target="_blank" rel="noopener">sr320.github.io/AREE</a></h2>
+      <p class="sub">Aquaculture Resilience Evidence Engine: harmonized omics evidence on resilience in Pacific oyster and other aquaculture species.</p>
       <section class="panel" id="p-aree">
         <h3>Results to date <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
@@ -228,7 +228,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     Refreshes every 5 minutes while open. Data comes from the SHORE site build, the
     <a href="https://github.com/RobertsLab/shore-line/tree/seneye-data" target="_blank" rel="noopener">seneye-data</a> branch, the
     <a href="https://github.com/RobertsLab/resources/tree/server-status/status" target="_blank" rel="noopener">server-status</a> branch, the
-    <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE site</a>, the
+    <a href="https://sr320.github.io/AREE/" target="_blank" rel="noopener">AREE site</a>, the
     <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a>, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a> and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
@@ -255,7 +255,7 @@ var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seney
 // The SHORE site build publishes its JSON next to the page. Try HTTPS first;
 // plain http only works when this file is opened locally or over http.
 var SHORE_BASES = ["https://ftr210.online/data/","https://robertslab.github.io/shore-line/data/","http://ftr210.online/data/"];
-var AREE_URL    = "https://sr320.github.io/AREE-co/";
+var AREE_URL    = "https://sr320.github.io/AREE/dashboard/data.json";
 var WHALE_URL   = "https://robertslab.github.io/project-white-whale/data.json";
 var WHALE_STALE_H = 8;
 var REFRESH_MS = 5 * 60 * 1000;
@@ -553,44 +553,30 @@ function renderKlone(ext){
 }
 
 /* ---------- AREE ---------- */
-function getAREE(){
-  return fetch(AREE_URL + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    var lm = r.headers.get("Last-Modified");
-    return r.text().then(function(t){ return {doc: new DOMParser().parseFromString(t, "text/html"), lastMod: lm}; });
-  });
-}
-
 function renderAREE(r){
-  if (!r.ok){ fail("p-aree", "AREE site not reachable (" + r.e.message + ")."); mark("AREE", "unk", "site not reachable"); return; }
-  var doc = r.v.doc, txt = function(n){ return n ? n.textContent.replace(/\s+/g, " ").trim() : ""; };
-  var stats = Array.prototype.map.call(doc.querySelectorAll(".stats .stat"), function(s){ return [txt(s.querySelector(".stat-label")), txt(s.querySelector(".stat-value"))]; });
-  var updated = Array.prototype.filter.call(doc.querySelectorAll("p"), function(p){ return /^Last updated from commit/.test(txt(p)); })[0];
-  var bm = updated && txt(updated).match(/site built (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC/);
-  var built = bm ? bm[1] + "T" + bm[2] + ":00Z" : (r.v.lastMod ? new Date(r.v.lastMod).toISOString() : null);
-  setAge("p-aree", built, null);
+  if (!r.ok){ fail("p-aree", "AREE data not reachable (" + r.e.message + ")."); mark("AREE", "unk", "site not reachable"); return; }
+  var d = r.v, k = d.kpis;
+  if (!k){ fail("p-aree", "AREE data.json loaded but its layout wasn't recognised."); mark("AREE", "unk", "data layout changed"); return; }
+  var n = function(x){ return x == null ? "—" : x.toLocaleString("en-US"); };
+  setAge("p-aree", d.generated_at, null);
 
-  var table = doc.querySelector("#real-study-progress table"), studies = [];
-  if (table){
-    var heads = Array.prototype.map.call(table.querySelectorAll("thead th"), txt);
-    var iS = heads.indexOf("Study"), iX = heads.indexOf("Stressor / phenotype"), iA = heads.indexOf("Analysis status");
-    studies = Array.prototype.map.call(table.querySelectorAll("tbody tr"), function(tr){
-      var td = tr.querySelectorAll("td"), a = td[0] && td[td.length - 1].querySelector("a");
-      return {id: txt(td[iS]), stress: txt(td[iX]), status: txt(td[iA]), href: a ? new URL(a.getAttribute("href"), AREE_URL).href : null};
-    });
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Studies", n(k.n_studies_real)),
+    reading("Evidence records", n(k.n_evidence_records_real)),
+    reading("High-priority candidates", n(k.n_candidates_real_high_priority)),
+    reading("Stressor classes", n(k.n_real_stressor_classes))
+  ])];
+  var tot = k.n_comparisons_real, done = k.n_comparisons_real_harmonized;
+  if (tot){
+    nodes.push(el("h4", {cls:"mini", text: done + " of " + tot + " contrasts harmonized"}));
+    nodes.push(bar(done / tot * 100, "ok"));
   }
-  if (!stats.length && !studies.length){ fail("p-aree", "AREE page loaded but its layout wasn't recognised."); mark("AREE", "unk", "page layout changed"); return; }
-
-  var nodes = [el("div", {cls:"readings"}, stats.map(function(s){ return reading(s[0], s[1]); }))];
-  var done = studies.filter(function(s){ return /\bharmonized\b/.test(s.status) && !/not harmonized/.test(s.status); });
-  if (studies.length){
-    var pct = done.length / studies.length * 100;
-    nodes.push(el("h4", {cls:"mini", text: done.length + " of " + studies.length + " contrasts harmonized"}));
-    nodes.push(bar(pct, "ok"));
-  }
-  if (updated) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: txt(updated)}));
+  if (d.commit) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, [
+    "Last updated from commit ", el("a", {href: (d.repo_url || "https://github.com/sr320/AREE") + "/commit/" + d.commit.sha, target:"_blank", rel:"noopener", text: d.commit.short}),
+    " (" + d.commit.date + "): " + d.commit.subject
+  ]));
   body("p-aree", nodes);
-  mark("AREE", "ok", studies.length ? done.length + "/" + studies.length + " harmonized" : "site up");
+  mark("AREE", "ok", tot ? done + "/" + tot + " harmonized" : "site up");
 }
 
 /* ---------- GitHub ---------- */
@@ -738,7 +724,7 @@ function load(){
     settle(getShore("field-water.json")),
     settle(getJSON(INLAB_URL)),
     settle(getRavenLive()),
-    settle(getAREE()),
+    settle(getJSON(AREE_URL)),
     settle(getJSON(CLAUDE_STATUS_URL)),
     settle(getJSON(CLAUDE_URL)),
     settle(getJSON(WHALE_URL)),
