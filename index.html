@@ -625,18 +625,10 @@ function renderAREE(r){
 
   var nodes = [el("div", {cls:"readings"}, stats.map(function(s){ return reading(s[0], s[1]); }))];
   var done = studies.filter(function(s){ return /\bharmonized\b/.test(s.status) && !/not harmonized/.test(s.status); });
-  var pending = studies.filter(function(s){ return done.indexOf(s) < 0; });
   if (studies.length){
     var pct = done.length / studies.length * 100;
     nodes.push(el("h4", {cls:"mini", text: done.length + " of " + studies.length + " contrasts harmonized"}));
     nodes.push(bar(pct, "ok"));
-  }
-  if (pending.length){
-    nodes.push(el("h4", {cls:"mini", text:"Not yet harmonized"}));
-    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Study"}), el("th", {text:"Stressor / phenotype"}), el("th", {text:"Status"})])]),
-      el("tbody", {}, pending.map(function(s){
-        return el("tr", {}, [el("td", {}, [s.href ? el("a", {href: s.href, target:"_blank", rel:"noopener", text: s.id}) : s.id]), el("td", {cls:"muted", text: s.stress}), el("td", {text: s.status.replace(/^raw /, "")})]);
-      }))])]));
   }
   if (updated) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: txt(updated)}));
   body("p-aree", nodes);
