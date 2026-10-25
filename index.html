@@ -456,8 +456,6 @@ function renderGannet(ext){
   var g = ext.v.gannet_stats;
   setAge("p-gannet", g.generated, DAILY_STALE_H);
   var nodes = [];
-  // Synology lists docker overlay mounts that mirror /volume2; show real volumes only.
-  var disks = (g.disks || []).filter(function(d){ return d.mount.indexOf("@") < 0; });
   var raid = g.raid || [], badRaid = raid.filter(function(x){ return !x.healthy; });
   var mem = g.memory && g.memory.mem;
   nodes.push(el("div", {cls:"readings"}, [
@@ -471,10 +469,10 @@ function renderGannet(ext){
   nodes.push(el("p", {style:"margin:10px 0 0;font-size:14px"}, [el("a", {href:"https://robertslab.github.io/resources/Gannet-Dashboard/", target:"_blank", rel:"noopener", text:"Full Gannet Dashboard"})]));
   body("p-gannet", nodes);
 
-  disks.forEach(function(d){ if (d.use_percent >= DISK_WARN) issue("gannet", d.use_percent >= DISK_BAD ? "bad" : "warn", d.mount + " is " + d.use_percent + "% full"); });
   badRaid.forEach(function(x){ issue("gannet", "bad", "RAID " + x.name + " is " + x.state + " (" + x.active + " of " + x.members + " active)"); });
   if ((g.kernel_errors || []).length) issue("gannet", "warn", g.kernel_errors.length + " kernel error(s) in today's report");
   if (hoursSince(g.generated) > DAILY_STALE_H) issue("gannet", "warn", "Health report is " + ago(g.generated));
+  mark("gannet", "ok", (raid.length - badRaid.length) + " of " + raid.length + " RAID healthy");
 }
 
 function renderKlone(ext){
