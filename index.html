@@ -49,6 +49,16 @@ button:hover{border-color:var(--sea)}
 .light b{font-size:15px}
 .light span{font-size:13px;color:var(--muted)}
 
+/* who's in lab */
+#p-inlab{margin-bottom:26px}
+.now{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.now span{background:var(--ok-bg);color:var(--ok);font-weight:700;padding:4px 12px;border-radius:999px}
+.now span small{font-weight:400;margin-left:4px}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;margin-top:12px}
+.days h4{font-size:13px;color:var(--muted);margin:0 0 2px;font-weight:700}
+.days ul{list-style:none;margin:0;padding:0;font-size:14px}
+.days li .t{color:var(--muted);font-size:13px}
+
 /* columns */
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 @media (max-width:860px){.cols{grid-template-columns:1fr}}
@@ -108,6 +118,11 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
   </header>
 
   <nav class="strip" id="strip" aria-label="System summary"></nav>
+
+  <section class="panel" id="p-inlab">
+    <h3>Who's in lab <span class="age" data-age></span></h3>
+    <div data-body><p class="muted">Loading…</p></div>
+  </section>
 
   <div class="cols">
     <div>
@@ -175,6 +190,8 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
 /* ---------- sources ---------- */
 var STATUS_BASE = "https://raw.githubusercontent.com/RobertsLab/resources/server-status/status/";
+var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
+var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
 var SENEYE_URL  = "https://raw.githubusercontent.com/RobertsLab/shore-line/seneye-data/seneye.json";
 // The SHORE site build publishes its JSON next to the page. Try HTTPS first;
 // plain http only works when this file is opened locally or over http.
@@ -348,6 +365,45 @@ function renderField(r){
   body("p-field", nodes);
 }
 
+/* ---------- Who's in lab ---------- */
+var LAB_TZ = "America/Los_Angeles";
+function labDay(t){ return new Date(t).toLocaleDateString("en-CA", {timeZone: LAB_TZ}); }
+function labTime(t){ return new Date(t).toLocaleTimeString([], {timeZone: LAB_TZ, hour:"numeric", minute:"2-digit"}); }
+function span(e){ return e.all_day ? "all day" : labTime(e.start) + " to " + labTime(e.end); }
+
+function renderInLab(r){
+  if (!r.ok){ fail("p-inlab", "Lab calendar feed not reachable (" + r.e.message + ")."); mark("In lab", "unk", "calendar not reachable"); return; }
+  var d = r.v, now = Date.now(), today = labDay(now);
+  setAge("p-inlab", d.updated_at, 1);
+  var evs = (d.events || []).filter(function(e){ return Date.parse(e.end) > now; });
+  var current = evs.filter(function(e){ return Date.parse(e.start) <= now; });
+  var nodes = [];
+  if (current.length){
+    nodes.push(el("div", {cls:"now"}, current.map(function(e){
+      return el("span", {title: e.title}, [e.name, el("small", {text: e.all_day ? "all day" : "until " + labTime(e.end)})]);
+    })));
+  } else nodes.push(el("p", {style:"margin:8px 0 4px", text:"Nobody has marked themselves in lab right now."}));
+  var byDay = {}, order = [];
+  evs.forEach(function(e){
+    if (current.indexOf(e) >= 0) return;
+    var k = labDay(e.start) < today ? today : labDay(e.start);
+    if (!byDay[k]){ byDay[k] = []; order.push(k); }
+    byDay[k].push(e);
+  });
+  if (order.length){
+    nodes.push(el("div", {cls:"days"}, order.map(function(k){
+      var label = k === today ? "Later today" : new Date(k + "T12:00:00").toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"});
+      return el("div", {}, [el("h4", {text: label}), el("ul", {}, byDay[k].map(function(e){
+        return el("li", {title: e.title}, [el("b", {text: e.name}), " ", el("span", {cls:"t", text: span(e)})]);
+      }))]);
+    })));
+  } else nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:14px", text:"No one else is on the calendar for the next " + (d.days_ahead || 7) + " days."}));
+  nodes.push(el("p", {style:"margin:12px 0 0;font-size:14px"}, [el("a", {href: CALENDAR_URL, target:"_blank", rel:"noopener", text:"Open the lab calendar"}),
+    el("span", {cls:"muted", text:" · counts events titled like “Sam in lab”, “Derek @ lab” or “Yaamini in FTR 134”."})]));
+  body("p-inlab", nodes);
+  mark("In lab", "ok", current.length ? current.map(function(e){ return e.name; }).join(", ") : "nobody right now");
+}
+
 /* ---------- Computing ---------- */
 function renderHosts(ext, int){
   var docs = [ext, int].filter(function(r){ return r.ok && r.v && r.v.hosts; }).map(function(r){ return r.v; });
@@ -447,7 +503,7 @@ function renderKlone(ext){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-raven"],["gannet","#p-gannet"],["klone","#p-klone"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -484,12 +540,13 @@ function load(){
     settle(getShore("tanks.json")),
     settle(getShore("webcam.json")),
     settle(getShore("reports.json")),
-    settle(getShore("field-water.json"))
+    settle(getShore("field-water.json")),
+    settle(getJSON(INLAB_URL))
   ]).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
-      function(){ renderField(R[6]); },
+      function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
       function(){ renderHosts(ext, int); }, function(){ renderRaven(ext, int); },
       function(){ renderGannet(ext); }, function(){ renderKlone(ext); }
     ];

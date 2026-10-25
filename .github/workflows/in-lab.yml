@@ -1,0 +1,38 @@
+name: Scrape lab calendar
+
+# Pulls the public lab Google Calendar and publishes the next week's
+# "in lab" events to in-lab.json on the calendar-data branch.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/in_lab.py, .github/workflows/in-lab.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: in-lab
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install icalendar recurring_ical_events
+      - run: mkdir -p out && python scripts/in_lab.py out/in-lab.json
+      - name: Publish to calendar-data branch
+        working-directory: out
+        run: |
+          git init -q -b calendar-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add in-lab.json
+          git commit -qm "Update in-lab.json"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" calendar-data
