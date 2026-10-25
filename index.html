@@ -527,7 +527,8 @@ function renderHosts(ext, int, ravenLive){
     else if (b.r.up){ lv = "ok"; txt = "up"; detail = (b.r.detail || "") + (b.r.latency_ms != null ? ", " + b.r.latency_ms + " ms" : ""); }
     else { lv = "bad"; txt = "down"; detail = b.r.detail || ""; }
     if (lv === "bad") issue(h, "bad", h + " not answering (" + detail + ")");
-    mark(h, lv === "ok" ? "ok" : lv, txt);
+    var note = h === "raven" && lv === "ok" && ravenLiveFresh(ravenLive) ? txt + ", CPU " + fmt(ravenLive.v.cpu_percent, 0) + "% busy" : txt;
+    mark(h, lv === "ok" ? "ok" : lv, note);
     return el("tr", {}, [el("td", {}, [el("span", {cls:"dot " + (lv === "unk" ? "" : lv)}), h]), el("td", {}, [pill(lv, txt)]), el("td", {cls:"muted", text: detail})]);
   });
   body("p-hosts", [el("table", {cls:"hosts"}, [el("tbody", {}, rows)])]);
