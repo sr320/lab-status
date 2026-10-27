@@ -601,7 +601,8 @@ function renderTTN(r, s){
       nodes.push(el("div", {cls:"readings"}, [
         reading("Uplinks since connect", c.uplink_count.toLocaleString("en-US")),
         reading("Last uplink", c.last_uplink_at ? ago(c.last_uplink_at) : "none"),
-        reading("Connected for", up != null ? dur(up) : "—")
+        reading("Connected for", up != null ? dur(up) : "—"),
+        c.metrics && c.metrics.temp != null ? reading("Gateway temp", fmt(c.metrics.temp, 0), "°C") : null
       ]));
       if (c.protocol) extra.push(c.protocol.toUpperCase());
       extra.push(c.downlink_count.toLocaleString("en-US") + " downlink" + (c.downlink_count === 1 ? "" : "s"));
