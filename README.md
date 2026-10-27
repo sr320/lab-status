@@ -13,6 +13,7 @@ Everything is client-side in `index.html`. It pulls JSON at load and every 5 min
 - the AREE site's dashboard data (https://sr320.github.io/AREE/dashboard/data.json): the `kpis` block for study, evidence, candidate and harmonized-contrast counts, plus `commit` and `generated_at`.
 - the Conditioning Atlas page itself (https://sr320.github.io/conditioning-atlas/, which allows cross-origin reads): the embedded `DATA` array for experiment, paper, species and stressor counts, the "built <date>" footer, and the `Last-Modified` header for when GitHub Pages last deployed it; plus the latest commit on `main` from the GitHub commits API.
 - the Project White Whale dashboard's `data.json` (https://robertslab.github.io/project-white-whale/data.json), rebuilt every 3 hours; the light turns amber if it's more than 8 hours old or reports that branch claims or the gannet mirror couldn't be read.
+- Packet Broker's public mapper record for the TTN gateway `sr320-indoor-01` (https://mapper.packetbroker.net/api/v2/gateways/netID=000013,tenantID=ttn,id=sr320-indoor-01): online flag, last update and packet rates per hour. No key is needed because the gateway's status is public in the TTN console. The record also holds the gateway's coordinates, which the page doesn't show. Uplink/downlink counts and connection times need a TTN API key, so they'd have to come from an Action like the calendar scrape.
 
 Thresholds (disk %, staleness hours) are constants near the top of the script.
 

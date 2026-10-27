@@ -160,7 +160,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
     <div>
       <h2>Computing <a href="https://robertslab.github.io/resources/Computing-Hardware/" target="_blank" rel="noopener">Handbook page</a></h2>
-      <p class="sub">Network checks, raven's 5-minute snapshot, and the daily klone report.</p>
+      <p class="sub">Network checks, raven's 5-minute snapshot, the daily klone report, and the LoRaWAN gateway.</p>
 
       <section class="panel" id="p-hosts">
         <h3>Reachable? <span class="age" data-age></span></h3>
@@ -174,6 +174,11 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
       <section class="panel" id="p-klone">
         <h3>klone allocation <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-ttn">
+        <h3>TTN gateway <a href="https://nam1.cloud.thethings.network/console/gateways/sr320-indoor-01" target="_blank" rel="noopener">sr320-indoor-01</a> <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
@@ -241,7 +246,8 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     <a href="https://sr320.github.io/AREE/" target="_blank" rel="noopener">AREE site</a>, the
     <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a>, the
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
-    <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a> and
+    <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a>,
+    <a href="https://packetbroker.net/" target="_blank" rel="noopener">Packet Broker</a>'s public gateway record and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
     A green host light only means it answered on the network.
   </footer>
@@ -274,6 +280,10 @@ var WHALE_STALE_H = 8;
 var ATLAS_PAGE_URL = "https://sr320.github.io/conditioning-atlas/";
 var ATLAS_COMMITS_URL = "https://api.github.com/repos/sr320/conditioning-atlas/commits?sha=main&per_page=1";
 var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
+// The Things Network shares gateway status with Packet Broker's public mapper, which needs no key and allows cross-origin reads.
+// It refreshes every 4 to 12 minutes; rxRate and txRate are packets per hour (its OpenAPI text says per second, which is wrong).
+var TTN_GATEWAY_URL = "https://mapper.packetbroker.net/api/v2/gateways/netID=000013,tenantID=ttn,id=sr320-indoor-01";
+var TTN_STALE_H = 1;
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -571,6 +581,36 @@ function renderKlone(ext){
   if (hoursSince(k.generated) > DAILY_STALE_H) issue("klone", "warn", "hyakalloc snapshot is " + ago(k.generated));
 }
 
+/* ---------- TTN gateway ---------- */
+// The record also carries the gateway's coordinates; those are deliberately not shown.
+function renderTTN(r){
+  if (!r.ok){
+    var gone = /HTTP 404/.test(r.e.message);
+    fail("p-ttn", gone ? "Packet Broker has no record for this gateway; it may have been offline long enough to drop off the map, or its status isn't public." : "Packet Broker not reachable (" + r.e.message + ").");
+    if (gone) issue("Gateway", "warn", "TTN gateway not listed on Packet Broker"); else mark("Gateway", "unk", "Packet Broker not reachable");
+    return;
+  }
+  var d = r.v, h = hoursSince(d.updatedAt), stale = h != null && h > TTN_STALE_H;
+  setAge("p-ttn", d.updatedAt, TTN_STALE_H);
+  var rate = function(x){ return x == null ? "—" : fmt(x, x > 0 && x < 10 ? 1 : 0); };
+  var lv = d.online === false ? "bad" : stale ? "warn" : d.online ? "ok" : "unk";
+  var txt = {ok:"online", warn:"online, report stale", bad:"offline", unk:"status unknown"}[lv];
+  var nodes = [
+    el("p", {style:"margin:8px 0 0"}, [pill(lv, txt)]),
+    el("div", {cls:"readings"}, [
+      reading("Received", rate(d.rxRate), "/h"),
+      reading("Sent", rate(d.txRate), "/h")
+    ]),
+    el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text:
+      [d.frequencyPlan && d.frequencyPlan.region ? d.frequencyPlan.region.replace(/_/g, " ") : null, d.clusterID,
+       "Packet rates are rough, sampled every 4 to 12 minutes"].filter(Boolean).join(" · ")})
+  ];
+  body("p-ttn", nodes);
+  if (lv === "bad") issue("Gateway", "bad", "TTN gateway sr320-indoor-01 is offline");
+  else if (stale) issue("Gateway", "warn", "TTN gateway status last reported " + ago(d.updatedAt));
+  mark("Gateway", lv, d.online ? txt + ", " + rate(d.rxRate) + " packets/h" : txt);
+}
+
 /* ---------- AREE ---------- */
 function renderAREE(r){
   if (!r.ok){ fail("p-aree", "AREE data not reachable (" + r.e.message + ")."); mark("AREE", "unk", "site not reachable"); return; }
@@ -765,7 +805,7 @@ function renderAtlas(r, c){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["Gateway","#p-ttn"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -815,7 +855,8 @@ function load(){
     settle(getJSON(WHALE_URL)),
     settle(getJSON(GITHUB_URL)),
     settle(getAtlas()),
-    settle(getJSON(ATLAS_COMMITS_URL))
+    settle(getJSON(ATLAS_COMMITS_URL)),
+    settle(getJSON(TTN_GATEWAY_URL))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -824,7 +865,8 @@ function load(){
       function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
       function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
       function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
-      function(){ renderGitHub(R[13]); }, function(){ renderAtlas(R[14], R[15]); }
+      function(){ renderGitHub(R[13]); }, function(){ renderAtlas(R[14], R[15]); },
+      function(){ renderTTN(R[16]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
