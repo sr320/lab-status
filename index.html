@@ -290,6 +290,9 @@ var TTN_QUIET_H = 6;
 // little-dragon-01 (Dragino LSN50v2-D20) readings from the my-tracker-320 Storage Integration, also fetched by the Action.
 var SENSOR_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/ttn-sensor.json";
 var SENSOR_QUIET_H = 2;
+// The LSN50v2 payload also carries inputs this probe doesn't use (ADC, door, interrupt) and its work mode; they're not shown.
+var SENSOR_HIDE = ["ADC_CH0V", "Digital_IStatus", "Door_status", "EXTI_Trigger", "Work_mode"];
+var SENSOR_LABELS = {TempC1: "Probe temperature", TempC2: "Probe 2", TempC3: "Probe 3", BatV: "Battery"};
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -637,8 +640,8 @@ function renderTTN(r, s){
 
 /* ---------- TTN sensor ---------- */
 // Field names come from the device's payload formatter, so units are guessed from the name.
-// Dragino reports 327.67 °C when no probe is attached; values that far out are treated as missing.
-function sensorUnit(k){ return /temp/i.test(k) ? "°C" : /bat/i.test(k) ? "V" : /hum/i.test(k) ? "%" : ""; }
+// Dragino reports 3276.7 °C on a channel with no probe attached; values that far out are treated as missing.
+function sensorUnit(k){ return /temp/i.test(k) ? "°C" : /bat/i.test(k) || /V$/.test(k) ? "V" : /hum/i.test(k) ? "%" : ""; }
 function renderSensor(r){
   if (!r.ok){
     var none = /HTTP 404/.test(r.e.message);
@@ -653,24 +656,25 @@ function renderSensor(r){
     return;
   }
   setAge("p-sensor", last.at, SENSOR_QUIET_H);
-  var f = last.fields || {}, keys = Object.keys(f);
+  var f = last.fields || {}, keys = Object.keys(f).filter(function(k){ return SENSOR_HIDE.indexOf(k) < 0; });
   var ok = function(k, v){ return typeof v === "number" && !(/temp/i.test(k) && Math.abs(v) >= 300); };
   var nums = keys.filter(function(k){ return typeof f[k] === "number"; })
     .sort(function(a, b){ return (/temp/i.test(b) - /temp/i.test(a)) || (/bat/i.test(a) - /bat/i.test(b)); });
   var probeless = nums.filter(function(k){ return !ok(k, f[k]); });
   var nodes = [el("div", {cls:"readings"}, nums.filter(function(k){ return ok(k, f[k]); }).slice(0, 4).map(function(k){
-    return reading(k.replace(/_/g, " "), fmt(f[k], /bat/i.test(k) ? 2 : 1), sensorUnit(k));
+    return reading(SENSOR_LABELS[k] || k.replace(/_/g, " "), fmt(f[k], sensorUnit(k) === "V" ? 2 : 1), sensorUnit(k));
   }))];
   var tk = nums.filter(function(k){ return /temp/i.test(k) && ok(k, f[k]); })[0];
   if (tk){
     var series = rows.map(function(x){ var v = (x.fields || {})[tk]; return ok(tk, v) ? v : null; }).filter(function(v){ return v != null; });
     if (series.length > 1){
-      nodes.push(el("h4", {cls:"mini", text: tk.replace(/_/g, " ") + ", last 24 h: " + fmt(Math.min.apply(null, series)) + " to " + fmt(Math.max.apply(null, series)) + " °C"}));
+      nodes.push(el("h4", {cls:"mini", text: (SENSOR_LABELS[tk] || tk.replace(/_/g, " ")) + ", last 24 h: " + fmt(Math.min.apply(null, series)) + " to " + fmt(Math.max.apply(null, series)) + " °C"}));
       nodes.push(spark(series));
     }
   }
   var notes = [];
-  if (probeless.length) notes.push(probeless.join(", ") + ": no probe reading");
+  // empty probe channels (TempC2 and TempC3 on a one-probe D20) are only worth a note when no probe reads at all
+  if (probeless.length && !tk) notes.push("no probe reading");
   keys.filter(function(k){ return typeof f[k] !== "number"; }).forEach(function(k){ notes.push(k.replace(/_/g, " ") + ": " + f[k]); });
   var here = (last.rx || []).filter(function(g){ return g.gateway === "sr320-indoor-01"; })[0] || (last.rx || [])[0];
   if (here) notes.push("heard by " + (here.gateway || "a gateway") + " at " + fmt(here.rssi, 0) + " dBm, SNR " + fmt(here.snr) + " dB" + (last.rx.length > 1 ? " (+" + (last.rx.length - 1) + " more)" : ""));
