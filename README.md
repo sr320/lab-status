@@ -1,6 +1,6 @@
 # lab-status
 
-One-page status dashboard for the Roberts Lab: SHORE tank room (Seneye, tankcam, water quality, Puget Sound water, logbook) and computing (raven, gannet, klone).
+One-page status dashboard for the Roberts Lab: SHORE tank room (Seneye, tankcam, water quality, logbook) and computing (raven, gannet, klone).
 
 Live: https://sr320.github.io/lab-status/
 

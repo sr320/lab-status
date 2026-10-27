@@ -135,7 +135,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
   <div class="cols">
     <div>
       <h2>SHORE tank room <a href="http://ftr210.online" target="_blank" rel="noopener">ftr210.online</a></h2>
-      <p class="sub">Tankcam, the Seneye tank, water quality and field water.</p>
+      <p class="sub">Tankcam, the Seneye tank and water quality.</p>
 
       <section class="panel" id="p-seneye">
         <h3>Seneye tank <span class="age" data-age></span></h3>
@@ -149,11 +149,6 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
       <section class="panel" id="p-wq">
         <h3>Water quality reports <span class="age" data-age></span></h3>
-        <div data-body><p class="muted">Loading…</p></div>
-      </section>
-
-      <section class="panel" id="p-field">
-        <h3>Puget Sound water <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
@@ -439,20 +434,6 @@ function renderWQ(r){
   var h = hoursSince(newest);
   if (h != null && h > WQ_STALE_D * 24) issue("Water quality", "warn", "No water quality report in " + ago(newest).replace(" ago",""));
   else mark("Water quality", d.error ? "warn" : "ok", newest ? "last report " + ago(newest) : "no reports");
-}
-
-function renderField(r){
-  if (!r.ok){ fail("p-field", "SHORE data not reachable (" + r.e.message + ")."); return; }
-  var d = r.v, L = d.latest || {}, s = d.stats || {};
-  setAge("p-field", d.updated_at, 3);
-  var nodes = [];
-  if (d.error) nodes.push(el("p", {cls:"err", text:"NOAA fetch error: " + d.error}));
-  nodes.push(el("div", {cls:"readings"}, [
-    reading((d.station && d.station.name) || "NOAA station", fmt(L.temp_c), "°C"),
-    reading("Range, last " + (s.hours || "") + " h", fmt(s.min) + " to " + fmt(s.max), "°C")
-  ]));
-  if (d.series && d.series.length) nodes.push(spark(d.series.map(function(x){ return x[1]; })));
-  body("p-field", nodes);
 }
 
 /* ---------- Who's in lab ---------- */
@@ -846,7 +827,6 @@ function load(){
     settle(getShore("tanks.json")),
     settle(getShore("webcam.json")),
     settle(getShore("reports.json")),
-    settle(getShore("field-water.json")),
     settle(getJSON(INLAB_URL)),
     settle(getRavenLive()),
     settle(getJSON(AREE_URL)),
@@ -861,12 +841,12 @@ function load(){
     var ext = R[0], int = R[1];
     var jobs = [
       function(){ renderSeneye(R[2], R[3]); }, function(){ renderCam(R[4]); }, function(){ renderWQ(R[5]); },
-      function(){ renderField(R[6]); }, function(){ renderInLab(R[7]); },
-      function(){ renderHosts(ext, int, R[8]); }, function(){ renderRavenLive(R[8]); },
-      function(){ renderKlone(ext); }, function(){ renderAREE(R[9]); },
-      function(){ renderClaudeStatus(R[10]); }, function(){ renderClaudeActivity(R[11]); }, function(){ renderWhale(R[12]); },
-      function(){ renderGitHub(R[13]); }, function(){ renderAtlas(R[14], R[15]); },
-      function(){ renderTTN(R[16]); }
+      function(){ renderInLab(R[6]); },
+      function(){ renderHosts(ext, int, R[7]); }, function(){ renderRavenLive(R[7]); },
+      function(){ renderKlone(ext); }, function(){ renderAREE(R[8]); },
+      function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
+      function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
+      function(){ renderTTN(R[15]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
