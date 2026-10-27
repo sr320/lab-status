@@ -36,3 +36,13 @@ The lab is on a claude.ai Team plan, which has no usage API (Anthropic's usage a
 Uplink and downlink counts, last uplink, connection time, model and firmware for `sr320-indoor-01` need a TTN API key, so `scripts/ttn_gateway.py` runs in the same 15-minute Action and writes `ttn-gateway.json` to the `calendar-data` branch. It reads the key from the `TTN_API_KEY` repository secret. The key belongs to the gateway and has only "View gateway information" and "View gateway status". Because that branch is public, the script leaves out the gateway's location and IP addresses. Until the secret exists, that step fails without stopping the job, and the panel shows only the Packet Broker fields. The panel warns if the gateway is connected but hasn't heard an uplink in 6 hours (`TTN_QUIET_H`).
 
 To stop it: delete the key under the gateway's API keys in the TTN console and remove the `TTN_API_KEY` secret.
+
+## TTN sensor
+
+`little-dragon-01`, a Dragino LSN50v2-D20 temperature probe in the TTN application `my-tracker-320`, is read by `scripts/ttn_sensor.py` in the same Action. The script asks the application's Storage Integration for the last 24 hours of uplinks (the most TTN's Sandbox keeps) and writes `ttn-sensor.json` to `calendar-data`. Each reading has the decoded payload fields and the RSSI and SNR at each gateway that heard it. Gateway locations and any location fields are left out. It needs:
+
+- the Storage Integration turned on for `my-tracker-320` (Integrations → Storage Integration in the console),
+- a payload formatter on the device, so readings arrive as named fields,
+- an application API key with only "Read application traffic (uplink and downlink)", saved as the `TTN_APP_API_KEY` repository secret.
+
+The panel shows the latest numeric fields and a 24-hour temperature line. Units are guessed from the field names. It warns if the sensor hasn't reported in 2 hours (`SENSOR_QUIET_H`).

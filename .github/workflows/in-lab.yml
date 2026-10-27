@@ -3,15 +3,16 @@ name: Scrape lab calendar
 # Pulls the public lab Google Calendar and publishes the next week's
 # "in lab" events to in-lab.json on the calendar-data branch, along with
 # claude.json (the last month of Claude Code commits across lab repos),
-# github.json (the last week of commits to RobertsLab repos) and
-# ttn-gateway.json (the TTN gateway's console stats, read with the TTN_API_KEY secret).
+# github.json (the last week of commits to RobertsLab repos),
+# ttn-gateway.json (the TTN gateway's console stats, read with the TTN_API_KEY secret) and
+# ttn-sensor.json (the last day of little-dragon-01 readings, read with the TTN_APP_API_KEY secret).
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, scripts/ttn_gateway.py, .github/workflows/in-lab.yml]
+    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, scripts/ttn_gateway.py, scripts/ttn_sensor.py, .github/workflows/in-lab.yml]
 
 permissions:
   contents: write
@@ -42,6 +43,10 @@ jobs:
         continue-on-error: true
         env:
           TTN_API_KEY: ${{ secrets.TTN_API_KEY }}
+      - run: python scripts/ttn_sensor.py out/ttn-sensor.json
+        continue-on-error: true
+        env:
+          TTN_APP_API_KEY: ${{ secrets.TTN_APP_API_KEY }}
       - name: Publish to calendar-data branch
         working-directory: out
         run: |

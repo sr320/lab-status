@@ -51,7 +51,7 @@ button:disabled{cursor:progress;color:var(--muted);border-color:var(--line)}
 .light span{font-size:13px;color:var(--muted)}
 
 /* who's in lab */
-#p-inlab,#p-ttn{margin-bottom:26px}
+#p-inlab,#p-ttn,#p-sensor{margin-bottom:26px}
 .now{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
 .now span{background:var(--ok-bg);color:var(--ok);font-weight:700;padding:4px 12px;border-radius:999px}
 .now span small{font-weight:400;margin-left:4px}
@@ -134,6 +134,11 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
   <section class="panel" id="p-ttn">
     <h3>TTN gateway <a href="https://nam1.cloud.thethings.network/console/gateways/sr320-indoor-01" target="_blank" rel="noopener">sr320-indoor-01</a> <span class="age" data-age></span></h3>
+    <div data-body><p class="muted">Loading…</p></div>
+  </section>
+
+  <section class="panel" id="p-sensor">
+    <h3>Sensor <a href="https://nam1.cloud.thethings.network/console/applications/my-tracker-320/devices/little-dragon-01" target="_blank" rel="noopener">little-dragon-01</a> <span class="age" data-age></span></h3>
     <div data-body><p class="muted">Loading…</p></div>
   </section>
 
@@ -282,6 +287,9 @@ var TTN_STALE_H = 1;
 // Console stats (uplink counts, connection times, model) need a TTN API key, so the 15-minute Action fetches them.
 var TTN_STATS_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/ttn-gateway.json";
 var TTN_QUIET_H = 6;
+// little-dragon-01 (Dragino LSN50v2-D20) readings from the my-tracker-320 Storage Integration, also fetched by the Action.
+var SENSOR_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/ttn-sensor.json";
+var SENSOR_QUIET_H = 2;
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -627,6 +635,54 @@ function renderTTN(r, s){
   mark("Gateway", lv, d.online ? txt + ", " + rate(d.rxRate) + " packets/h" : txt);
 }
 
+/* ---------- TTN sensor ---------- */
+// Field names come from the device's payload formatter, so units are guessed from the name.
+// Dragino reports 327.67 °C when no probe is attached; values that far out are treated as missing.
+function sensorUnit(k){ return /temp/i.test(k) ? "°C" : /bat/i.test(k) ? "V" : /hum/i.test(k) ? "%" : ""; }
+function renderSensor(r){
+  if (!r.ok){
+    var none = /HTTP 404/.test(r.e.message);
+    fail("p-sensor", none ? "No readings yet. They need the TTN_APP_API_KEY secret and the Storage Integration turned on for my-tracker-320." : "Sensor data not reachable (" + r.e.message + ").");
+    mark("Sensor", "unk", none ? "not set up yet" : "data not reachable");
+    return;
+  }
+  var d = r.v, rows = d.readings || [], last = rows[rows.length - 1];
+  if (!last){
+    fail("p-sensor", "No uplinks from " + d.device + " in the last 24 hours.");
+    issue("Sensor", "warn", d.device + " hasn't sent anything in 24 hours");
+    return;
+  }
+  setAge("p-sensor", last.at, SENSOR_QUIET_H);
+  var f = last.fields || {}, keys = Object.keys(f);
+  var ok = function(k, v){ return typeof v === "number" && !(/temp/i.test(k) && Math.abs(v) >= 300); };
+  var nums = keys.filter(function(k){ return typeof f[k] === "number"; })
+    .sort(function(a, b){ return (/temp/i.test(b) - /temp/i.test(a)) || (/bat/i.test(a) - /bat/i.test(b)); });
+  var probeless = nums.filter(function(k){ return !ok(k, f[k]); });
+  var nodes = [el("div", {cls:"readings"}, nums.filter(function(k){ return ok(k, f[k]); }).slice(0, 4).map(function(k){
+    return reading(k.replace(/_/g, " "), fmt(f[k], /bat/i.test(k) ? 2 : 1), sensorUnit(k));
+  }))];
+  var tk = nums.filter(function(k){ return /temp/i.test(k) && ok(k, f[k]); })[0];
+  if (tk){
+    var series = rows.map(function(x){ var v = (x.fields || {})[tk]; return ok(tk, v) ? v : null; }).filter(function(v){ return v != null; });
+    if (series.length > 1){
+      nodes.push(el("h4", {cls:"mini", text: tk.replace(/_/g, " ") + ", last 24 h: " + fmt(Math.min.apply(null, series)) + " to " + fmt(Math.max.apply(null, series)) + " °C"}));
+      nodes.push(spark(series));
+    }
+  }
+  var notes = [];
+  if (probeless.length) notes.push(probeless.join(", ") + ": no probe reading");
+  keys.filter(function(k){ return typeof f[k] !== "number"; }).forEach(function(k){ notes.push(k.replace(/_/g, " ") + ": " + f[k]); });
+  var here = (last.rx || []).filter(function(g){ return g.gateway === "sr320-indoor-01"; })[0] || (last.rx || [])[0];
+  if (here) notes.push("heard by " + (here.gateway || "a gateway") + " at " + fmt(here.rssi, 0) + " dBm, SNR " + fmt(here.snr) + " dB" + (last.rx.length > 1 ? " (+" + (last.rx.length - 1) + " more)" : ""));
+  notes.push(rows.length + " uplink" + (rows.length === 1 ? "" : "s") + " in 24 h");
+  if (d.model) notes.push(d.model);
+  nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: notes.join(" · ")}));
+  body("p-sensor", nodes);
+  var h = hoursSince(last.at);
+  if (h != null && h > SENSOR_QUIET_H) issue("Sensor", "warn", d.device + " last reported " + ago(last.at));
+  else mark("Sensor", "ok", (tk ? fmt(f[tk]) + " °C, " : "") + ago(last.at));
+}
+
 /* ---------- AREE ---------- */
 function renderAREE(r){
   if (!r.ok){ fail("p-aree", "AREE data not reachable (" + r.e.message + ")."); mark("AREE", "unk", "site not reachable"); return; }
@@ -821,7 +877,7 @@ function renderAtlas(r, c){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -872,7 +928,8 @@ function load(){
     settle(getAtlas()),
     settle(getJSON(ATLAS_COMMITS_URL)),
     settle(getJSON(TTN_GATEWAY_URL)),
-    settle(getJSON(TTN_STATS_URL))
+    settle(getJSON(TTN_STATS_URL)),
+    settle(getJSON(SENSOR_URL))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -882,7 +939,7 @@ function load(){
       function(){ renderKlone(ext); }, function(){ renderAREE(R[8]); },
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
-      function(){ renderTTN(R[15], R[16]); }
+      function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
