@@ -2,15 +2,16 @@ name: Scrape lab calendar
 
 # Pulls the public lab Google Calendar and publishes the next week's
 # "in lab" events to in-lab.json on the calendar-data branch, along with
-# claude.json (the last month of Claude Code commits across lab repos) and
-# github.json (the last week of commits to RobertsLab repos).
+# claude.json (the last month of Claude Code commits across lab repos),
+# github.json (the last week of commits to RobertsLab repos) and
+# ttn-gateway.json (the TTN gateway's console stats, read with the TTN_API_KEY secret).
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, .github/workflows/in-lab.yml]
+    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, scripts/ttn_gateway.py, .github/workflows/in-lab.yml]
 
 permissions:
   contents: write
@@ -37,6 +38,10 @@ jobs:
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - run: python scripts/ttn_gateway.py out/ttn-gateway.json
+        continue-on-error: true
+        env:
+          TTN_API_KEY: ${{ secrets.TTN_API_KEY }}
       - name: Publish to calendar-data branch
         working-directory: out
         run: |

@@ -279,6 +279,9 @@ var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
 // It refreshes every 4 to 12 minutes; rxRate and txRate are packets per hour (its OpenAPI text says per second, which is wrong).
 var TTN_GATEWAY_URL = "https://mapper.packetbroker.net/api/v2/gateways/netID=000013,tenantID=ttn,id=sr320-indoor-01";
 var TTN_STALE_H = 1;
+// Console stats (uplink counts, connection times, model) need a TTN API key, so the 15-minute Action fetches them.
+var TTN_STATS_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/ttn-gateway.json";
+var TTN_QUIET_H = 6;
 var REFRESH_MS = 5 * 60 * 1000;
 
 /* thresholds */
@@ -564,7 +567,7 @@ function renderKlone(ext){
 
 /* ---------- TTN gateway ---------- */
 // The record also carries the gateway's coordinates; those are deliberately not shown.
-function renderTTN(r){
+function renderTTN(r, s){
   if (!r.ok){
     var gone = /HTTP 404/.test(r.e.message);
     fail("p-ttn", gone ? "Packet Broker has no record for this gateway; it may have been offline long enough to drop off the map, or its status isn't public." : "Packet Broker not reachable (" + r.e.message + ").");
@@ -586,9 +589,40 @@ function renderTTN(r){
       [d.frequencyPlan && d.frequencyPlan.region ? d.frequencyPlan.region.replace(/_/g, " ") : null, d.clusterID,
        "Packet rates are rough, sampled every 4 to 12 minutes"].filter(Boolean).join(" · ")})
   ];
+  var c = s && s.ok ? s.v : null;
+  if (c){
+    var secs = function(x){ var n = parseFloat(x); return isNaN(n) ? null : n; };
+    var up = c.connected_at ? (Date.now() - Date.parse(c.connected_at)) / 1000 : null;
+    nodes.push(el("h4", {cls:"mini", text: "Console stats" + (c.model && c.model.model_id ? ": " + [c.model.brand_id, c.model.model_id].filter(Boolean).join(" ") : "")}));
+    var extra = [];
+    if (c.connected === false){
+      nodes.push(el("p", {style:"margin:8px 0 0"}, [pill("bad", "not connected to TTN"), c.disconnected_at ? " disconnected " + ago(c.disconnected_at) : null]));
+    } else {
+      nodes.push(el("div", {cls:"readings"}, [
+        reading("Uplinks since connect", c.uplink_count.toLocaleString("en-US")),
+        reading("Last uplink", c.last_uplink_at ? ago(c.last_uplink_at) : "none"),
+        reading("Connected for", up != null ? dur(up) : "—")
+      ]));
+      if (c.protocol) extra.push(c.protocol.toUpperCase());
+      extra.push(c.downlink_count.toLocaleString("en-US") + " downlink" + (c.downlink_count === 1 ? "" : "s"));
+    }
+    var rtt = c.round_trip_times && secs(c.round_trip_times.median);
+    if (rtt != null) extra.push("round trip " + Math.round(rtt * 1000) + " ms median");
+    var busiest = (c.sub_bands || []).reduce(function(m, b){ return (b.downlink_utilization || 0) > (m ? m.downlink_utilization || 0 : -1) ? b : m; }, null);
+    if (busiest && busiest.downlink_utilization_limit) extra.push("downlink airtime " + fmt(busiest.downlink_utilization * 100, 2) + "% of " + fmt(busiest.downlink_utilization_limit * 100, 0) + "% allowed");
+    var fw = c.model && c.model.firmware_version || c.versions && (c.versions.firmware || c.versions.package);
+    if (fw) extra.push("firmware " + fw);
+    extra.push("stats " + ago(c.updated_at));
+    nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: extra.join(" · ")}));
+  } else if (s && !/HTTP 404/.test(s.e.message)){
+    nodes.push(el("p", {cls:"err", style:"margin:8px 0 0", text: "Console stats not reachable (" + s.e.message + ")."}));
+  }
   body("p-ttn", nodes);
+  var quiet = c && c.connected && c.last_uplink_at ? hoursSince(c.last_uplink_at) : null;
   if (lv === "bad") issue("Gateway", "bad", "TTN gateway sr320-indoor-01 is offline");
+  else if (c && c.connected === false && hoursSince(c.updated_at) < TTN_STALE_H) issue("Gateway", "bad", "TTN gateway sr320-indoor-01 is not connected to The Things Network");
   else if (stale) issue("Gateway", "warn", "TTN gateway status last reported " + ago(d.updatedAt));
+  if (quiet != null && quiet > TTN_QUIET_H) issue("Gateway", "warn", "TTN gateway is connected but hasn't heard an uplink in " + ago(c.last_uplink_at).replace(" ago", ""));
   mark("Gateway", lv, d.online ? txt + ", " + rate(d.rxRate) + " packets/h" : txt);
 }
 
@@ -836,7 +870,8 @@ function load(){
     settle(getJSON(GITHUB_URL)),
     settle(getAtlas()),
     settle(getJSON(ATLAS_COMMITS_URL)),
-    settle(getJSON(TTN_GATEWAY_URL))
+    settle(getJSON(TTN_GATEWAY_URL)),
+    settle(getJSON(TTN_STATS_URL))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -846,7 +881,7 @@ function load(){
       function(){ renderKlone(ext); }, function(){ renderAREE(R[8]); },
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
-      function(){ renderTTN(R[15]); }
+      function(){ renderTTN(R[15], R[16]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
