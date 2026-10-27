@@ -51,7 +51,7 @@ button:disabled{cursor:progress;color:var(--muted);border-color:var(--line)}
 .light span{font-size:13px;color:var(--muted)}
 
 /* who's in lab */
-#p-inlab{margin-bottom:26px}
+#p-inlab,#p-ttn{margin-bottom:26px}
 .now{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
 .now span{background:var(--ok-bg);color:var(--ok);font-weight:700;padding:4px 12px;border-radius:999px}
 .now span small{font-weight:400;margin-left:4px}
@@ -132,6 +132,11 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
     <div data-body><p class="muted">Loading…</p></div>
   </section>
 
+  <section class="panel" id="p-ttn">
+    <h3>TTN gateway <a href="https://nam1.cloud.thethings.network/console/gateways/sr320-indoor-01" target="_blank" rel="noopener">sr320-indoor-01</a> <span class="age" data-age></span></h3>
+    <div data-body><p class="muted">Loading…</p></div>
+  </section>
+
   <div class="cols">
     <div>
       <h2>SHORE tank room <a href="http://ftr210.online" target="_blank" rel="noopener">ftr210.online</a></h2>
@@ -155,7 +160,7 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
     <div>
       <h2>Computing <a href="https://robertslab.github.io/resources/Computing-Hardware/" target="_blank" rel="noopener">Handbook page</a></h2>
-      <p class="sub">Network checks, raven's 5-minute snapshot, the daily klone report, and the LoRaWAN gateway.</p>
+      <p class="sub">Network checks, raven's 5-minute snapshot, and the daily klone report.</p>
 
       <section class="panel" id="p-hosts">
         <h3>Reachable? <span class="age" data-age></span></h3>
@@ -169,11 +174,6 @@ footer{margin-top:30px;color:var(--muted);font-size:13px}
 
       <section class="panel" id="p-klone">
         <h3>klone allocation <span class="age" data-age></span></h3>
-        <div data-body><p class="muted">Loading…</p></div>
-      </section>
-
-      <section class="panel" id="p-ttn">
-        <h3>TTN gateway <a href="https://nam1.cloud.thethings.network/console/gateways/sr320-indoor-01" target="_blank" rel="noopener">sr320-indoor-01</a> <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
@@ -821,7 +821,7 @@ function renderAtlas(r, c){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["Gateway","#p-ttn"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
