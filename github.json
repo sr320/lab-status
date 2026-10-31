@@ -1,0 +1,195 @@
+{
+ "updated_at": "2026-10-31T15:36:23+00:00",
+ "org": "RobertsLab",
+ "days": 7,
+ "total": 88,
+ "people": [
+  "Ariana",
+  "Claude (cloud)",
+  "Hazel",
+  "Laura",
+  "Sam",
+  "Steven"
+ ],
+ "repos": [
+  {
+   "repo": "lab-website",
+   "url": "https://github.com/RobertsLab/lab-website",
+   "commits": 14,
+   "people": [
+    "Claude (cloud)",
+    "Laura",
+    "Steven"
+   ],
+   "last_at": "2026-10-31T15:16:26Z"
+  },
+  {
+   "repo": "polyIC-larvae",
+   "url": "https://github.com/RobertsLab/polyIC-larvae",
+   "commits": 5,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-10-30T20:04:26Z"
+  },
+  {
+   "repo": "acantha",
+   "url": "https://github.com/RobertsLab/acantha",
+   "commits": 18,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-10-29T21:51:11Z"
+  },
+  {
+   "repo": "10K-seed-Cgigas",
+   "url": "https://github.com/RobertsLab/10K-seed-Cgigas",
+   "commits": 1,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-10-29T20:56:04Z"
+  },
+  {
+   "repo": "project-cod-temperature",
+   "url": "https://github.com/RobertsLab/project-cod-temperature",
+   "commits": 2,
+   "people": [
+    "Laura"
+   ],
+   "last_at": "2026-10-29T17:13:30Z"
+  },
+  {
+   "repo": "sams-notebook",
+   "url": "https://github.com/RobertsLab/sams-notebook",
+   "commits": 11,
+   "people": [
+    "Sam"
+   ],
+   "last_at": "2026-10-29T17:00:19Z"
+  },
+  {
+   "repo": "project-white-whale",
+   "url": "https://github.com/RobertsLab/project-white-whale",
+   "commits": 32,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-10-29T15:23:07Z"
+  },
+  {
+   "repo": "sormi-assay-development",
+   "url": "https://github.com/RobertsLab/sormi-assay-development",
+   "commits": 3,
+   "people": [
+    "Hazel",
+    "Sam"
+   ],
+   "last_at": "2026-10-26T19:19:49Z"
+  },
+  {
+   "repo": "resources",
+   "url": "https://github.com/RobertsLab/resources",
+   "commits": 1,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-10-25T11:53:58Z"
+  },
+  {
+   "repo": "shore-line",
+   "url": "https://github.com/RobertsLab/shore-line",
+   "commits": 1,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-10-24T20:40:46Z"
+  }
+ ],
+ "recent": [
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:16:26Z",
+   "msg": "People: add 2026 graduation year for Noah Ozguner and Hannah Nowers",
+   "url": "https://github.com/RobertsLab/lab-website/commit/a369bf0e0166e27e78272e2dcd315ddc6bccb845"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:15:28Z",
+   "msg": "People: move Noah Ozguner and Hannah Nowers to undergraduate alumni",
+   "url": "https://github.com/RobertsLab/lab-website/commit/ed859f12773f7f07bb57f00d304df47dc09b01ae"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:12:54Z",
+   "msg": "People: move Celeste Valdivia to alumni, add Kate Laboda as graduate student",
+   "url": "https://github.com/RobertsLab/lab-website/commit/74e46aebf7ed2db15cfb733c42d4d34e5c2c4f23"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:10:08Z",
+   "msg": "Fix amount escaping on MAROSA page",
+   "url": "https://github.com/RobertsLab/lab-website/commit/ac52be7b2672b43974f6b99c1cfc3149f4268256"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:10:00Z",
+   "msg": "Use full project summary for MAROSA page",
+   "url": "https://github.com/RobertsLab/lab-website/commit/ca0c7707a20335557bb4f3e02c585bb98e719919"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:09:46Z",
+   "msg": "Add Seaver Institute El Ni\u00f1o project page and feature it",
+   "url": "https://github.com/RobertsLab/lab-website/commit/7412e426f4ad96eb6b570034df9a40b0fb4dc851"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T15:06:15Z",
+   "msg": "Add new 2026 funded projects to Projects page",
+   "url": "https://github.com/RobertsLab/lab-website/commit/7058042a8e6cbefde5da59f41bfe7cc601b90a8f"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T12:43:56Z",
+   "msg": "Add front page post introducing AREE",
+   "url": "https://github.com/RobertsLab/lab-website/commit/69b588cff3ac74527c581fd84ab41d86c0181484"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T12:36:22Z",
+   "msg": "Add model code link to Epigenetic Intelligence publication entry",
+   "url": "https://github.com/RobertsLab/lab-website/commit/8a1cba86bd4e6e575763c2d7e1a680a5855e465d"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T12:33:24Z",
+   "msg": "Expand Epigenetic Intelligence post using full paper and add figures",
+   "url": "https://github.com/RobertsLab/lab-website/commit/b276a126071ea69d3cf585773dc550ac479fb419"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T12:29:13Z",
+   "msg": "Update Epigenetic Intelligence entry to published Environmental Epigenetics version",
+   "url": "https://github.com/RobertsLab/lab-website/commit/f27fd4eae2400b0f39a54be1b4ee930a552b1575"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Claude (cloud)",
+   "at": "2026-10-31T12:27:07Z",
+   "msg": "Add front page post for Epigenetic Intelligence paper (Environmental Epigenetics 2026)",
+   "url": "https://github.com/RobertsLab/lab-website/commit/f9675fa16899ee46daf83513e53b44ed80ab610d"
+  }
+ ]
+}

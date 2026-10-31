@@ -1,0 +1,45 @@
+{
+ "updated_at": "2026-10-31T15:36:29+00:00",
+ "gateway": "sr320-indoor-01",
+ "name": "indoor gateway",
+ "description": null,
+ "model": {},
+ "frequency_plans": [
+  "US_902_928_FSB_2"
+ ],
+ "connected": true,
+ "connected_at": "2026-10-31T06:40:27.349003569Z",
+ "disconnected_at": null,
+ "protocol": "udp",
+ "last_status_at": "2026-10-31T15:36:23.257025109Z",
+ "versions": {
+  "ttn-lw-gateway-server": "3.37.0-rc1-SNAPSHOT-8ee360dbdf"
+ },
+ "metrics": {
+  "ackr": 100,
+  "txin": 0,
+  "txok": 0,
+  "temp": 22,
+  "rxin": 0,
+  "rxok": 0,
+  "rxfw": 0
+ },
+ "uplink_count": 27,
+ "last_uplink_at": "2026-10-31T15:29:35.607563406Z",
+ "downlink_count": 4,
+ "last_downlink_at": "2026-10-31T04:29:43.605013517Z",
+ "tx_ack_count": 4,
+ "round_trip_times": null,
+ "sub_bands": [
+  {
+   "min_frequency": "902300000",
+   "max_frequency": "914900000",
+   "downlink_utilization_limit": 1
+  },
+  {
+   "min_frequency": "923300000",
+   "max_frequency": "927500000",
+   "downlink_utilization_limit": 1
+  }
+ ]
+}

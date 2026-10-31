@@ -1,0 +1,1592 @@
+{
+ "updated_at": "2026-10-31T15:36:30+00:00",
+ "application": "my-tracker-320",
+ "device": "little-dragon-01",
+ "model": "Dragino LSN50v2-D20",
+ "readings": [
+  {
+   "at": "2026-10-30T15:49:52.115559342Z",
+   "f_cnt": 258,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T16:09:51.868166752Z",
+   "f_cnt": 259,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T16:29:51.635617222Z",
+   "f_cnt": 260,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T16:49:51.403586389Z",
+   "f_cnt": 261,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T17:09:51.188283705Z",
+   "f_cnt": 262,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T17:29:50.939166631Z",
+   "f_cnt": 263,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -66,
+     "snr": 11.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T17:49:50.707026999Z",
+   "f_cnt": 264,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T18:09:50.476282796Z",
+   "f_cnt": 265,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T18:29:50.238636657Z",
+   "f_cnt": 266,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T18:49:50.007628308Z",
+   "f_cnt": 267,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.7,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T19:09:49.779017305Z",
+   "f_cnt": 268,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T19:29:49.555682786Z",
+   "f_cnt": 269,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T19:49:49.296178899Z",
+   "f_cnt": 270,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.7,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T20:09:49.064118536Z",
+   "f_cnt": 271,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T20:29:48.835259303Z",
+   "f_cnt": 272,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 10.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T20:49:48.584901461Z",
+   "f_cnt": 273,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T21:09:48.351993958Z",
+   "f_cnt": 274,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.9,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T21:29:48.121143951Z",
+   "f_cnt": 275,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.2,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T21:49:47.904463884Z",
+   "f_cnt": 276,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T22:09:47.722165521Z",
+   "f_cnt": 277,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T22:29:47.413579002Z",
+   "f_cnt": 278,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 13.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T22:49:47.253637748Z",
+   "f_cnt": 279,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 10.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T23:09:46.941413142Z",
+   "f_cnt": 280,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T23:29:46.696339636Z",
+   "f_cnt": 281,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-30T23:49:46.467531284Z",
+   "f_cnt": 282,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.2,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T00:09:46.279121437Z",
+   "f_cnt": 283,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 8.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T00:29:45.991918352Z",
+   "f_cnt": 284,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T00:49:45.772569062Z",
+   "f_cnt": 285,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T01:09:45.519891092Z",
+   "f_cnt": 286,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -58,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T01:29:45.295114508Z",
+   "f_cnt": 287,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T01:49:45.069958737Z",
+   "f_cnt": 288,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -66,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T02:09:44.819647868Z",
+   "f_cnt": 289,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T02:29:44.619438340Z",
+   "f_cnt": 290,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T02:49:44.365323066Z",
+   "f_cnt": 291,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -60,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T03:09:44.117312960Z",
+   "f_cnt": 292,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -58,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T03:29:43.887903114Z",
+   "f_cnt": 293,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 10.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T03:49:43.648302668Z",
+   "f_cnt": 294,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T04:09:43.422658489Z",
+   "f_cnt": 295,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T04:29:43.191840230Z",
+   "f_cnt": 296,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 7.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T04:49:42.947313160Z",
+   "f_cnt": 297,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 6.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T05:09:42.725445511Z",
+   "f_cnt": 298,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T05:29:42.478561275Z",
+   "f_cnt": 299,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T05:49:42.245668666Z",
+   "f_cnt": 300,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T06:09:42.067561660Z",
+   "f_cnt": 301,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T06:29:41.800751029Z",
+   "f_cnt": 302,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4.7,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -66,
+     "snr": 11
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T06:49:41.557812873Z",
+   "f_cnt": 303,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T07:09:41.350792365Z",
+   "f_cnt": 304,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T07:29:41.097251224Z",
+   "f_cnt": 305,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.6,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T07:49:40.865043914Z",
+   "f_cnt": 306,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T08:09:40.635609770Z",
+   "f_cnt": 307,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 10.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T08:29:40.401105184Z",
+   "f_cnt": 308,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T08:49:40.177145813Z",
+   "f_cnt": 309,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 2.9,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T09:09:39.980658107Z",
+   "f_cnt": 310,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T09:29:39.768479486Z",
+   "f_cnt": 311,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T09:49:39.486186402Z",
+   "f_cnt": 312,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T10:09:39.275054206Z",
+   "f_cnt": 313,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T10:29:39.039531227Z",
+   "f_cnt": 314,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T10:49:38.801221268Z",
+   "f_cnt": 315,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T11:09:38.577659729Z",
+   "f_cnt": 316,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14.2
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T11:29:38.341949975Z",
+   "f_cnt": 317,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -66,
+     "snr": 10
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T11:49:38.113141983Z",
+   "f_cnt": 318,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T12:09:37.894694313Z",
+   "f_cnt": 319,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 10.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T12:29:37.669934184Z",
+   "f_cnt": 320,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 3.9,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -63,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T12:49:37.461569123Z",
+   "f_cnt": 321,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13.8
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T13:09:37.195299798Z",
+   "f_cnt": 322,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T13:29:36.963670306Z",
+   "f_cnt": 323,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 4.8,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T13:49:36.749989259Z",
+   "f_cnt": 324,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.1,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -64,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T14:09:36.506447878Z",
+   "f_cnt": 325,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.2,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -61,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T14:29:36.272357978Z",
+   "f_cnt": 326,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.2,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T14:49:36.045319346Z",
+   "f_cnt": 327,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.3,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T15:09:35.805001628Z",
+   "f_cnt": 328,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.606,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.4,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -62,
+     "snr": 13.5
+    }
+   ]
+  },
+  {
+   "at": "2026-10-31T15:29:35.609087590Z",
+   "f_cnt": 329,
+   "fields": {
+    "ADC_CH0V": 0,
+    "BatV": 3.612,
+    "Digital_IStatus": "L",
+    "Door_status": "OPEN",
+    "EXTI_Trigger": "FALSE",
+    "TempC1": 5.5,
+    "TempC2": 3276.7,
+    "TempC3": 3276.7,
+    "Work_mode": "3DS18B20"
+   },
+   "rx": [
+    {
+     "gateway": "sr320-indoor-01",
+     "rssi": -65,
+     "snr": 14
+    }
+   ]
+  }
+ ]
+}
