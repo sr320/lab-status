@@ -1,0 +1,191 @@
+{
+ "updated_at": "2026-11-07T09:39:21+00:00",
+ "org": "RobertsLab",
+ "days": 7,
+ "total": 94,
+ "people": [
+  "Ariana",
+  "Claude (cloud)",
+  "Sam",
+  "Steven"
+ ],
+ "repos": [
+  {
+   "repo": "sams-notebook",
+   "url": "https://github.com/RobertsLab/sams-notebook",
+   "commits": 2,
+   "people": [
+    "Sam"
+   ],
+   "last_at": "2026-11-05T16:41:51Z"
+  },
+  {
+   "repo": "shore-line",
+   "url": "https://github.com/RobertsLab/shore-line",
+   "commits": 3,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-05T00:11:35Z"
+  },
+  {
+   "repo": "code",
+   "url": "https://github.com/RobertsLab/code",
+   "commits": 4,
+   "people": [
+    "Sam"
+   ],
+   "last_at": "2026-11-04T22:21:36Z"
+  },
+  {
+   "repo": "manchester-hardening",
+   "url": "https://github.com/RobertsLab/manchester-hardening",
+   "commits": 47,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-11-04T06:04:15Z"
+  },
+  {
+   "repo": "resources",
+   "url": "https://github.com/RobertsLab/resources",
+   "commits": 1,
+   "people": [
+    "Sam"
+   ],
+   "last_at": "2026-11-03T22:48:34Z"
+  },
+  {
+   "repo": "project-lake-trout",
+   "url": "https://github.com/RobertsLab/project-lake-trout",
+   "commits": 7,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-02T17:36:00Z"
+  },
+  {
+   "repo": "project-white-whale",
+   "url": "https://github.com/RobertsLab/project-white-whale",
+   "commits": 2,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-02T12:38:23Z"
+  },
+  {
+   "repo": "10K-seed-Cgigas",
+   "url": "https://github.com/RobertsLab/10K-seed-Cgigas",
+   "commits": 9,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-11-02T05:10:40Z"
+  },
+  {
+   "repo": "project-gigas-conditioning",
+   "url": "https://github.com/RobertsLab/project-gigas-conditioning",
+   "commits": 1,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-11-02T04:48:53Z"
+  },
+  {
+   "repo": "lab-website",
+   "url": "https://github.com/RobertsLab/lab-website",
+   "commits": 18,
+   "people": [
+    "Claude (cloud)",
+    "Steven"
+   ],
+   "last_at": "2026-10-31T16:57:33Z"
+  }
+ ],
+ "recent": [
+  {
+   "repo": "sams-notebook",
+   "who": "Sam",
+   "at": "2026-11-05T16:41:51Z",
+   "msg": "render 20261104 esp32 temp nb on laptop",
+   "url": "https://github.com/RobertsLab/sams-notebook/commit/b7dc4eef13fcc4774d7accf51eae9098d14e1c4d"
+  },
+  {
+   "repo": "sams-notebook",
+   "who": "Sam",
+   "at": "2026-11-05T16:41:35Z",
+   "msg": "initial commit 20261104 esp32 temp nb",
+   "url": "https://github.com/RobertsLab/sams-notebook/commit/464e0b2828f22420edfaa1ea3471511efd1f03cb"
+  },
+  {
+   "repo": "shore-line",
+   "who": "Steven",
+   "at": "2026-11-05T00:11:35Z",
+   "msg": "Live Tankcams: add live HLS video from webcam_03",
+   "url": "https://github.com/RobertsLab/shore-line/commit/484100daa46ef714de1754167ee3cd83ee6c1393"
+  },
+  {
+   "repo": "shore-line",
+   "who": "Steven",
+   "at": "2026-11-04T23:38:22Z",
+   "msg": "Live Tankcams: add second camera from gannet webcam_02",
+   "url": "https://github.com/RobertsLab/shore-line/commit/eaa4e08d176916d7b2f60867017a63ecc6ab77c9"
+  },
+  {
+   "repo": "shore-line",
+   "who": "Steven",
+   "at": "2026-11-04T23:12:16Z",
+   "msg": "Facility temperatures: add ESP32 probe cards from Gannet",
+   "url": "https://github.com/RobertsLab/shore-line/commit/03ac8144bb430098d35ab78a59560a8f7286fdc0"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-04T22:21:36Z",
+   "msg": "shore_temps: upload readings to Gannet receiver over HTTPS",
+   "url": "https://github.com/RobertsLab/code/commit/d64d10af0c80d0fe45ed742560f26297dba1153c"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-04T21:49:02Z",
+   "msg": "shore_temps: add WiFi diagnostics and HUB_TOKEN to secrets template",
+   "url": "https://github.com/RobertsLab/code/commit/afba6463e2dd53160d64ec06929170d05450cf48"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-04T18:30:05Z",
+   "msg": "add Gannet receiver readme; clearer error when HUB_TOKENS is missing",
+   "url": "https://github.com/RobertsLab/code/commit/226f0189b7fd036f83c466cb4679df1b41161e50"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-04T18:22:52Z",
+   "msg": "add shore_temps ESP32 tank temperature hub and Gannet receiver",
+   "url": "https://github.com/RobertsLab/code/commit/f66fca75cc0bb4dc5d463a043b17dd6eb4033dca"
+  },
+  {
+   "repo": "manchester-hardening",
+   "who": "Ariana",
+   "at": "2026-11-04T06:04:15Z",
+   "msg": "updated script",
+   "url": "https://github.com/RobertsLab/manchester-hardening/commit/1c1bdb573d5dfc66124ed3f85593a97e2098f227"
+  },
+  {
+   "repo": "manchester-hardening",
+   "who": "Ariana",
+   "at": "2026-11-04T05:34:26Z",
+   "msg": "added data",
+   "url": "https://github.com/RobertsLab/manchester-hardening/commit/c9cddfb6b9125535d42603de42da452d64b762aa"
+  },
+  {
+   "repo": "manchester-hardening",
+   "who": "Ariana",
+   "at": "2026-11-04T05:32:10Z",
+   "msg": "added data",
+   "url": "https://github.com/RobertsLab/manchester-hardening/commit/970e616c5ea80b511ab30fb75287889c850b0c33"
+  }
+ ]
+}
