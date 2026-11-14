@@ -1,0 +1,152 @@
+{
+ "updated_at": "2026-11-14T07:00:47+00:00",
+ "org": "RobertsLab",
+ "days": 7,
+ "total": 26,
+ "people": [
+  "Ariana",
+  "Claude (cloud)",
+  "Kathleen",
+  "Megan",
+  "Sam",
+  "Steven",
+  "William"
+ ],
+ "repos": [
+  {
+   "repo": "polyIC-larvae",
+   "url": "https://github.com/RobertsLab/polyIC-larvae",
+   "commits": 3,
+   "people": [
+    "Ariana",
+    "Sam"
+   ],
+   "last_at": "2026-11-14T01:20:26Z"
+  },
+  {
+   "repo": "vims-resazurin",
+   "url": "https://github.com/RobertsLab/vims-resazurin",
+   "commits": 9,
+   "people": [
+    "William",
+    "Steven"
+   ],
+   "last_at": "2026-11-12T18:08:43Z"
+  },
+  {
+   "repo": "10K-seed-Cgigas",
+   "url": "https://github.com/RobertsLab/10K-seed-Cgigas",
+   "commits": 8,
+   "people": [
+    "Ariana"
+   ],
+   "last_at": "2026-11-11T02:31:20Z"
+  },
+  {
+   "repo": "lab-website",
+   "url": "https://github.com/RobertsLab/lab-website",
+   "commits": 2,
+   "people": [
+    "Megan",
+    "Kathleen"
+   ],
+   "last_at": "2026-11-10T19:54:27Z"
+  },
+  {
+   "repo": "shore-line",
+   "url": "https://github.com/RobertsLab/shore-line",
+   "commits": 4,
+   "people": [
+    "Steven",
+    "Claude (cloud)"
+   ],
+   "last_at": "2026-11-10T00:06:04Z"
+  }
+ ],
+ "recent": [
+  {
+   "repo": "polyIC-larvae",
+   "who": "Ariana",
+   "at": "2026-11-14T01:20:26Z",
+   "msg": "updated survival models",
+   "url": "https://github.com/RobertsLab/polyIC-larvae/commit/72e4b1f0dbfe268f5d01e4e44ea5fbe8b86dd3f1"
+  },
+  {
+   "repo": "polyIC-larvae",
+   "who": "Ariana",
+   "at": "2026-11-13T01:23:30Z",
+   "msg": "updated growth figure",
+   "url": "https://github.com/RobertsLab/polyIC-larvae/commit/0956766b2181a385640db7a439424f15ad56fb4c"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T18:08:43Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/f523e8ee4dc6775e19fd36e9cba84b968bc7aa19"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T17:16:33Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/9733236a8ebfdf59f4d74c58bd11c51410799a63"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T17:10:40Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/65611a4213d7c731a418e5288eb92db757d4c182"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "Steven",
+   "at": "2026-11-12T16:21:48Z",
+   "msg": "meta",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/ab87586d789a01a978a23634d6de0f057aebd62f"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T16:20:16Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/b0951e82c5383d6425875562306fdee05e4207f6"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "Steven",
+   "at": "2026-11-12T15:52:46Z",
+   "msg": "added images and org by date",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/08a15d8d652ff34f261b57c1c2a47f8ed0ffad1c"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T15:49:01Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/b6969b52eba5fb91970b6e1c4cc0cb3da8f19aea"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T15:40:33Z",
+   "msg": "Add files via upload",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/2bd23c67ecfc080f1e583fde3c0a602328c53dae"
+  },
+  {
+   "repo": "vims-resazurin",
+   "who": "William",
+   "at": "2026-11-12T15:38:32Z",
+   "msg": "Create USDA Team Demo",
+   "url": "https://github.com/RobertsLab/vims-resazurin/commit/0a8ae5468d4baebfe8bc88595aef02b4339d8949"
+  },
+  {
+   "repo": "10K-seed-Cgigas",
+   "who": "Ariana",
+   "at": "2026-11-11T02:31:20Z",
+   "msg": "added data",
+   "url": "https://github.com/RobertsLab/10K-seed-Cgigas/commit/58eab4dae750f39928177397d489e505ada3a178"
+  }
+ ]
+}
