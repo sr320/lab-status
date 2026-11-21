@@ -1,0 +1,188 @@
+{
+ "updated_at": "2026-11-21T09:00:21+00:00",
+ "days": 30,
+ "scopes": [
+  "org:RobertsLab",
+  "user:sr320"
+ ],
+ "total": 206,
+ "daily": [
+  [
+   "2026-10-23",
+   32
+  ],
+  [
+   "2026-10-24",
+   18
+  ],
+  [
+   "2026-10-25",
+   40
+  ],
+  [
+   "2026-10-26",
+   19
+  ],
+  [
+   "2026-10-27",
+   0
+  ],
+  [
+   "2026-10-28",
+   9
+  ],
+  [
+   "2026-10-29",
+   6
+  ],
+  [
+   "2026-10-30",
+   0
+  ],
+  [
+   "2026-10-31",
+   17
+  ],
+  [
+   "2026-11-01",
+   3
+  ],
+  [
+   "2026-11-02",
+   5
+  ],
+  [
+   "2026-11-03",
+   1
+  ],
+  [
+   "2026-11-04",
+   8
+  ],
+  [
+   "2026-11-05",
+   0
+  ],
+  [
+   "2026-11-06",
+   0
+  ],
+  [
+   "2026-11-07",
+   0
+  ],
+  [
+   "2026-11-08",
+   0
+  ],
+  [
+   "2026-11-09",
+   4
+  ],
+  [
+   "2026-11-10",
+   0
+  ],
+  [
+   "2026-11-11",
+   0
+  ],
+  [
+   "2026-11-12",
+   0
+  ],
+  [
+   "2026-11-13",
+   0
+  ],
+  [
+   "2026-11-14",
+   1
+  ],
+  [
+   "2026-11-15",
+   0
+  ],
+  [
+   "2026-11-16",
+   2
+  ],
+  [
+   "2026-11-17",
+   1
+  ],
+  [
+   "2026-11-18",
+   4
+  ],
+  [
+   "2026-11-19",
+   24
+  ],
+  [
+   "2026-11-20",
+   9
+  ],
+  [
+   "2026-11-21",
+   0
+  ]
+ ],
+ "people": [
+  {
+   "name": "Steven",
+   "commits": 180,
+   "commits_7d": 39,
+   "top_repo": "RobertsLab/project-white-whale",
+   "repos": 14
+  },
+  {
+   "name": "Claude (cloud)",
+   "commits": 22,
+   "commits_7d": 1,
+   "top_repo": "RobertsLab/lab-website",
+   "repos": 4
+  },
+  {
+   "name": "Sam",
+   "commits": 4,
+   "commits_7d": 0,
+   "top_repo": "RobertsLab/code",
+   "repos": 1
+  }
+ ],
+ "repos": [
+  {
+   "repo": "RobertsLab/project-white-whale",
+   "commits": 63
+  },
+  {
+   "repo": "sr320/lab-status",
+   "commits": 30
+  },
+  {
+   "repo": "RobertsLab/acantha",
+   "commits": 20
+  },
+  {
+   "repo": "RobertsLab/lab-website",
+   "commits": 15
+  },
+  {
+   "repo": "sr320/safs-connector",
+   "commits": 14
+  },
+  {
+   "repo": "sr320/project-blue-sea",
+   "commits": 12
+  },
+  {
+   "repo": "sr320/AREE",
+   "commits": 11
+  },
+  {
+   "repo": "RobertsLab/shore-line",
+   "commits": 10
+  }
+ ]
+}

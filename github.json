@@ -1,0 +1,143 @@
+{
+ "updated_at": "2026-11-21T09:00:21+00:00",
+ "org": "RobertsLab",
+ "days": 7,
+ "total": 13,
+ "people": [
+  "Sam",
+  "Steven"
+ ],
+ "repos": [
+  {
+   "repo": "tusk",
+   "url": "https://github.com/RobertsLab/tusk",
+   "commits": 1,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-20T14:26:44Z"
+  },
+  {
+   "repo": "acantha",
+   "url": "https://github.com/RobertsLab/acantha",
+   "commits": 3,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-19T13:22:31Z"
+  },
+  {
+   "repo": "project-white-whale",
+   "url": "https://github.com/RobertsLab/project-white-whale",
+   "commits": 2,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-19T05:01:36Z"
+  },
+  {
+   "repo": "resazurin-explorer",
+   "url": "https://github.com/RobertsLab/resazurin-explorer",
+   "commits": 5,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-17T21:36:04Z"
+  },
+  {
+   "repo": "code",
+   "url": "https://github.com/RobertsLab/code",
+   "commits": 2,
+   "people": [
+    "Sam"
+   ],
+   "last_at": "2026-11-16T21:23:54Z"
+  }
+ ],
+ "recent": [
+  {
+   "repo": "tusk",
+   "who": "Steven",
+   "at": "2026-11-20T14:26:44Z",
+   "msg": "add interactive gene-body methylation model page after gene expression page",
+   "url": "https://github.com/RobertsLab/tusk/commit/cab816b9c0ae033fd6a2c7258ad4f9868845c06c"
+  },
+  {
+   "repo": "acantha",
+   "who": "Steven",
+   "at": "2026-11-19T13:22:31Z",
+   "msg": "Keep the scheduled workflows from being disabled after 60 days",
+   "url": "https://github.com/RobertsLab/acantha/commit/58b4ff5baa0a8af16117e646e21920bd7b79dce2"
+  },
+  {
+   "repo": "acantha",
+   "who": "Steven",
+   "at": "2026-11-19T13:05:15Z",
+   "msg": "Add ntfy phone alerts when farm-relevant conditions change",
+   "url": "https://github.com/RobertsLab/acantha/commit/3ccb6f1528f87aa68ac02be2b827c7c2909efb6a"
+  },
+  {
+   "repo": "acantha",
+   "who": "Steven",
+   "at": "2026-11-19T12:49:39Z",
+   "msg": "Add a plain-language briefing written by Claude",
+   "url": "https://github.com/RobertsLab/acantha/commit/9bb52975dd1d165855c448fac97c546e8d2e86b1"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-19T05:01:36Z",
+   "msg": "WANG2023_TIDAL_TRANSGEN_WGBS: summarized (record-run elated_pesquet)",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/b84c8ab2c483fc398f26683b6c5b4cc2b80ed84f"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-19T04:59:18Z",
+   "msg": "WANG2023_TIDAL_TRANSGEN_WGBS: accept 96% conversion for this study",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/45eacf524cd19daea9c45eb8c0d3aa507d68828f"
+  },
+  {
+   "repo": "resazurin-explorer",
+   "who": "Steven",
+   "at": "2026-11-17T21:36:04Z",
+   "msg": "Add Taylor Shellfish Sept 2025 screening and family views",
+   "url": "https://github.com/RobertsLab/resazurin-explorer/commit/2c292a20ab10d65befd8e930da673540b6f94f59"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-16T21:23:54Z",
+   "msg": "add probe number/ID table to gannet readme.txt",
+   "url": "https://github.com/RobertsLab/code/commit/dc715f6ef0907042030b913dca5a948e15c1245b"
+  },
+  {
+   "repo": "code",
+   "who": "Sam",
+   "at": "2026-11-16T21:23:37Z",
+   "msg": "add shore_temps README.md",
+   "url": "https://github.com/RobertsLab/code/commit/28b533e55e764047cd122ad77d44deed01682882"
+  },
+  {
+   "repo": "resazurin-explorer",
+   "who": "Steven",
+   "at": "2026-11-14T16:53:33Z",
+   "msg": "Add GitHub repo link icon to site header",
+   "url": "https://github.com/RobertsLab/resazurin-explorer/commit/c77df38e7bac0b4b5b87852372a2e6e1a4f02619"
+  },
+  {
+   "repo": "resazurin-explorer",
+   "who": "Steven",
+   "at": "2026-11-14T16:48:23Z",
+   "msg": "Create CNAME",
+   "url": "https://github.com/RobertsLab/resazurin-explorer/commit/de9c84557566c30a1c23f646ccc1c794c6a05365"
+  },
+  {
+   "repo": "resazurin-explorer",
+   "who": "Steven",
+   "at": "2026-11-14T15:56:10Z",
+   "msg": "Initiate repo",
+   "url": "https://github.com/RobertsLab/resazurin-explorer/commit/76c7e157f59dee35d0a4bf643ff114aab758ba78"
+  }
+ ]
+}
