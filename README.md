@@ -22,7 +22,7 @@ Thresholds (disk %, staleness hours) are constants near the top of the script.
 
 `.github/workflows/in-lab.yml` runs every 15 minutes, at :07, :22, :37 and :52 to stay off the busy quarter-hours. It reads the lab Google Calendar's public iCal feed, keeps the next 7 days of events titled like "Sam in lab", "Derek @ lab" or "Yaamini in FTR 134" (`scripts/in_lab.py`), and force-pushes `in-lab.json` to the `calendar-data` branch, which the page reads. The browser can't fetch the calendar directly (no CORS), which is why this runs as an Action.
 
-GitHub delays scheduled runs by hours, so raven also starts the workflow every 15 minutes. A cron in sr320's crontab on raven runs `~/lab-status-live/trigger_scrape.sh` (a copy of `scripts/trigger_scrape.sh`) at :03, :18, :33 and :48. It force-pushes a one-file commit to the `scrape-trigger` branch with the same deploy key `raven_live.sh` uses (`~/.ssh/lab_status_deploy`), and the workflow runs on pushes to that branch. The workflow's own schedule stays on as a fallback.
+GitHub delays scheduled runs by hours, so raven also starts the workflow every 15 minutes. A cron in sr320's crontab on raven runs `~/lab-status-live/trigger_scrape.sh` (a copy of `scripts/trigger_scrape.sh`) at :03, :18, :33 and :48. It force-pushes an empty commit on top of `main` to the `scrape-trigger` branch with the same deploy key `raven_live.sh` uses (`~/.ssh/lab_status_deploy`), and the workflow runs on pushes to that branch. The workflow's own schedule stays on as a fallback.
 
 To stop it: remove the `trigger_scrape.sh` line from the crontab on raven and delete the `scrape-trigger` branch.
 
