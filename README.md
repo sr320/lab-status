@@ -31,6 +31,30 @@ Raven isn't reachable from outside UW, so it pushes its own numbers. A cron in s
 
 To stop it: remove the `raven_live.sh` line from the crontab on raven and delete the "raven live stats" deploy key in the repo settings.
 
+## klone by person
+
+The klone allocation panel comes from the daily `hyakalloc` snapshot in `RobertsLab/resources`, which only shows totals per account and partition. "klone by person" adds per-user detail. Klone needs Duo for SSH, so it pushes the data itself. A `scrontab` job runs `~/lab-status-live/klone_usage.sh` every hour (copies of `scripts/klone_usage.sh` and `scripts/klone_usage.py`). It calls `sacct` once for the last 7 days and `squeue` for the reasons pending jobs are waiting, then force-pushes `klone-usage.json` as the only commit on the `klone-usage` branch. The push uses a deploy key (`~/.ssh/lab_status_klone_deploy`) that can write to this repo only.
+
+For each person the panel shows running and pending jobs, CPUs and memory in use now, CPU-hours over the last 7 days (and how much of that ran on ckpt), and how many jobs failed, timed out, ran out of memory, were preempted or were cancelled. Below that is a daily bar chart of lab CPU-hours split between owned nodes and ckpt. Job names, paths and command lines are never recorded.
+
+`coenv` is shared with other labs, so only lab members are named: anyone in `KLONE_USERS` (comma-separated NetIDs, set in `klone_usage.sh`) plus anyone who ran a job under `srlab` in the window. Everyone else is one "other coenv" row. `KLONE_ACCOUNTS` (default `srlab,coenv`), `KLONE_LAB_ACCOUNTS` (default `srlab`) and `KLONE_WINDOW_D` (default 7) are also read from the environment. Like `hyakalloc`, it only sees accounts sr320 can query. The light turns amber if the snapshot is more than 3 hours old (`KLONE_USAGE_STALE_H`).
+
+Setup, on klone:
+
+1. `mkdir -p ~/lab-status-live` and copy both scripts there; `chmod +x ~/lab-status-live/klone_usage.sh`.
+2. `ssh-keygen -t ed25519 -N "" -f ~/.ssh/lab_status_klone_deploy`, then add the `.pub` as a deploy key named "klone usage" with write access under this repo's Settings → Deploy keys.
+3. Fill in `KLONE_USERS` in `klone_usage.sh`, run it once by hand, and check that the `klone-usage` branch appears.
+4. `scrontab -e` and add:
+
+   ```
+   #SCRON --account=srlab --partition=ckpt --time=00:10:00 --mem=1G
+   7 * * * * $HOME/lab-status-live/klone_usage.sh >> $HOME/lab-status-live/klone_usage.log 2>&1
+   ```
+
+Until the branch exists, the panel says it isn't set up yet and doesn't raise a warning.
+
+To stop it: remove the line from `scrontab -e` on klone and delete the "klone usage" deploy key in the repo settings.
+
 ## Claude
 
 The lab is on a claude.ai Team plan, which has no usage API (Anthropic's usage and analytics APIs need a Console org or Enterprise), so token and spend numbers stay on the admin page at claude.ai/analytics/claude-code. The panel instead counts public commits carrying Claude Code's `Co-Authored-By: Claude` trailer over the last 30 days. `scripts/claude_activity.py` runs in the same Action as the calendar scrape, searches the GitHub scopes in its `SCOPES` list (`org:RobertsLab`, `user:sr320`; add `user:<login>` for others), and writes `claude.json` to the `calendar-data` branch with first names only.
