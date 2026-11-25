@@ -30,7 +30,9 @@ BAD_STATES = {"FAILED", "TIMEOUT", "OUT_OF_MEMORY", "NODE_FAIL", "PREEMPTED", "C
 
 
 def run(cmd):
-    return subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=300).stdout
+    # klone's system python is 3.6: no capture_output= or text=
+    return subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          universal_newlines=True, timeout=300).stdout
 
 
 def parse_time(s):
