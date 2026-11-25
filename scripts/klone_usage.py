@@ -24,7 +24,7 @@ LAB_ACCOUNTS = set(os.environ.get("KLONE_LAB_ACCOUNTS", "srlab").split(","))
 LAB_USERS = {u for u in os.environ.get("KLONE_USERS", "").split(",") if u}
 WINDOW_D = int(os.environ.get("KLONE_WINDOW_D", "7"))
 
-SACCT_FIELDS = ["User", "Account", "Partition", "State", "AllocCPUS", "ReqCPUS",
+SACCT_FIELDS = ["JobIDRaw", "User", "Account", "Partition", "State", "AllocCPUS", "ReqCPUS",
                 "AllocTRES", "ReqMem", "Start", "End", "Submit"]
 BAD_STATES = {"FAILED", "TIMEOUT", "OUT_OF_MEMORY", "NODE_FAIL", "PREEMPTED", "CANCELLED", "BOOT_FAIL", "DEADLINE"}
 
@@ -64,6 +64,16 @@ def tres(s, key):
     return None
 
 
+def base_account(account, names):
+    """Klone's Slurm accounts can carry a partition prefix, e.g. cpu-g2-coenv
+    for coenv. Return the configured name the account belongs to, or None."""
+    parts = account.split("-")
+    for n in names:
+        if account == n or n in parts:
+            return n
+    return None
+
+
 def is_ckpt(partition):
     return partition.split(",")[0].startswith("ckpt")
 
@@ -72,31 +82,53 @@ def main(out_path):
     now = dt.datetime.now()  # sacct prints local time
     # whole days: today so far plus the WINDOW_D - 1 days before it
     start = dt.datetime.combine(now.date() - dt.timedelta(days=WINDOW_D - 1), dt.time())
-    raw = run(["sacct", "-a", "-X", "-n", "--parsable2", "-A", ",".join(ACCOUNTS),
-               "-S", start.strftime("%Y-%m-%dT%H:%M:%S"), "-E", "now",
-               "--format=" + ",".join(SACCT_FIELDS)])
-    jobs = []
-    for line in raw.splitlines():
-        cells = line.split("|")
-        if len(cells) != len(SACCT_FIELDS):
-            continue
-        j = dict(zip(SACCT_FIELDS, cells))
-        j["State"] = j["State"].split()[0]  # "CANCELLED by 123" -> "CANCELLED"
-        jobs.append(j)
+    seen = set()
 
-    lab = set(LAB_USERS) | {j["User"] for j in jobs if j["Account"] in LAB_ACCOUNTS}
+    def sacct(select):
+        out = []
+        raw = run(["sacct", "-X", "-n", "--parsable2"] + select +
+                  ["-S", start.strftime("%Y-%m-%dT%H:%M:%S"), "-E", "now",
+                   "--format=" + ",".join(SACCT_FIELDS)])
+        for line in raw.splitlines():
+            cells = line.split("|")
+            if len(cells) != len(SACCT_FIELDS):
+                continue
+            j = dict(zip(SACCT_FIELDS, cells))
+            if j["JobIDRaw"] in seen:
+                continue
+            seen.add(j["JobIDRaw"])
+            j["State"] = j["State"].split()[0]  # "CANCELLED by 123" -> "CANCELLED"
+            out.append(j)
+        return out
+
+    # Everyone on the lab's accounts, then every other job lab members ran on
+    # any account -- checkpoint jobs are charged to accounts not in ACCOUNTS.
+    jobs = sacct(["-a", "-A", ",".join(ACCOUNTS)])
+    lab = set(LAB_USERS) | {j["User"] for j in jobs if base_account(j["Account"], LAB_ACCOUNTS)}
+    if lab:
+        jobs += sacct(["-u", ",".join(sorted(lab))])
+
+    def other(account):
+        return "other " + (base_account(account, ACCOUNTS) or account)
 
     def who(j):
-        return j["User"] if j["User"] in lab else "other " + j["Account"]
+        return j["User"] if j["User"] in lab else other(j["Account"])
 
     # pending reasons from squeue (optional; sacct doesn't carry them everywhere)
     reasons = defaultdict(lambda: defaultdict(int))
-    try:
-        for line in run(["squeue", "-h", "-t", "PD", "-A", ",".join(ACCOUNTS), "-o", "%u|%a|%r"]).splitlines():
-            u, a, r = (line.split("|") + ["", "", ""])[:3]
-            reasons[u if u in lab else "other " + a][r or "unknown"] += 1
-    except (subprocess.SubprocessError, OSError):
-        pass
+    pend_seen = set()
+    queries = [["-A", ",".join(ACCOUNTS)]] + ([["-u", ",".join(sorted(lab))]] if lab else [])
+    for q in queries:
+        try:
+            out = run(["squeue", "-h", "-t", "PD"] + q + ["-o", "%i|%u|%a|%r"])
+        except (subprocess.SubprocessError, OSError):
+            continue
+        for line in out.splitlines():
+            i, u, a, r = (line.split("|") + ["", "", "", ""])[:4]
+            if i in pend_seen:
+                continue
+            pend_seen.add(i)
+            reasons[u if u in lab else other(a)][r or "unknown"] += 1
 
     days = [start.date() + dt.timedelta(days=i) for i in range(WINDOW_D)]
     day_idx = {d: i for i, d in enumerate(days)}
