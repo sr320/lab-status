@@ -19,7 +19,7 @@ Thresholds (disk %, staleness hours) are constants near the top of the script.
 
 ## Who's in lab
 
-`.github/workflows/in-lab.yml` runs every 15 minutes. It reads the lab Google Calendar's public iCal feed, keeps the next 7 days of events titled like "Sam in lab", "Derek @ lab" or "Yaamini in FTR 134" (`scripts/in_lab.py`), and force-pushes `in-lab.json` to the `calendar-data` branch, which the page reads. The browser can't fetch the calendar directly (no CORS), which is why this runs as an Action.
+`.github/workflows/in-lab.yml` runs every 15 minutes, at :07, :22, :37 and :52 to stay off the busy quarter-hours. It reads the lab Google Calendar's public iCal feed, keeps the next 7 days of events titled like "Sam in lab", "Derek @ lab" or "Yaamini in FTR 134" (`scripts/in_lab.py`), and force-pushes `in-lab.json` to the `calendar-data` branch, which the page reads. The browser can't fetch the calendar directly (no CORS), which is why this runs as an Action.
 
 GitHub delays scheduled runs by hours, so raven also starts the workflow every 15 minutes. A cron in sr320's crontab on raven runs `~/lab-status-live/trigger_scrape.sh` (a copy of `scripts/trigger_scrape.sh`), which calls the workflow dispatch API with a fine-grained token stored in `~/.config/lab-status/dispatch_token`. The token is limited to this repo and has only "Actions: Read and write". The workflow's own schedule stays on as a fallback.
 

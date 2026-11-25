@@ -8,7 +8,7 @@ name: Scrape lab calendar
 # ttn-sensor.json (the last day of little-dragon-01 readings, read with the TTN_APP_API_KEY secret).
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
