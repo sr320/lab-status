@@ -26,6 +26,10 @@ GitHub delays scheduled runs by hours, so raven also starts the workflow every 1
 
 To stop it: remove the `trigger_scrape.sh` line from the crontab on raven and delete the `scrape-trigger` branch.
 
+## Lab notebooks
+
+`scripts/notebooks.py` runs in the same workflow as the calendar scrape and writes `notebooks.json` to the `calendar-data` branch. It reads the notebook list from the `var notebooks = [...]` array on [robertslab.info/notebooks.html](https://robertslab.info/notebooks.html), so adding someone there adds them to the dashboard. For each notebook it takes the newest item in its RSS/Atom feed, the newest post by that author on genefish.wordpress.com, or (with no feed) the last commit to its repo.
+
 ## raven right now
 
 Raven isn't reachable from outside UW, so it pushes its own numbers. A cron in sr320's crontab on raven runs `~/lab-status-live/raven_live.sh` every 5 minutes (copies of `scripts/raven_live.sh` and `scripts/raven_live.py`). It samples `/proc` for 2 seconds (per-core CPU, load, memory, per-user totals, top processes by name only) and force-pushes `raven-live.json` as the only commit on the `raven-live` branch, using a deploy key (`~/.ssh/lab_status_deploy`) that can write to this repo only. The page reads it through the GitHub contents API, which caches for 60 seconds.
