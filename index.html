@@ -13,6 +13,7 @@
   --bg:#E9EEED; --panel:#F7F9F8; --ink:#17262E; --muted:#5A6B72; --line:#CBD5D4;
   --sea:#2C6E73; --ok:#2E7D4F; --warn:#B07A0C; --bad:#B0342A; --unk:#7C8A90;
   --ok-bg:#DCEDE2; --warn-bg:#F6EAC9; --bad-bg:#F5D9D5; --unk-bg:#E1E6E8;
+  --grp2:#7A5AA6;
   --sans:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif:"Literata", Georgia, "Times New Roman", serif;
 }
@@ -22,6 +23,7 @@
     --bg:#0F1A1F; --panel:#16252C; --ink:#E3ECEC; --muted:#93A6AC; --line:#2A3D45;
     --sea:#6FB3B3; --ok:#5DBB82; --warn:#E0AE45; --bad:#EE7B6E; --unk:#8C9BA1;
     --ok-bg:#183A29; --warn-bg:#3C3015; --bad-bg:#45201C; --unk-bg:#22323A;
+    --grp2:#B59BDB;
   }
 }
 *{box-sizing:border-box}
@@ -105,7 +107,9 @@ h4.mini{font-size:13px;color:var(--muted);margin:14px 0 0}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 2px;align-items:end}
 .days .col{display:flex;flex-direction:column;align-items:stretch;gap:3px;font-size:12px;color:var(--muted);text-align:center}
 .days .stack{height:64px;display:flex;flex-direction:column;justify-content:flex-end;border-radius:3px;background:var(--unk-bg);overflow:hidden}
-.days .stack b{display:block} .days .own{background:var(--sea)} .days .ck{background:var(--unk)}
+.days .stack b{display:block}
+.grp{font-size:12px;color:var(--muted);white-space:nowrap}
+.grp i{display:inline-block;width:8px;height:8px;border-radius:2px;margin:0 3px 0 6px;vertical-align:0}
 .key{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 10px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unk);margin-right:6px;vertical-align:baseline}
 .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
@@ -573,6 +577,26 @@ function getKloneUsage(){
     .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .catch(function(){ return getJSON(KLONE_USAGE_RAW); });
 }
+// srlab, coenv, ckpt in that order; any other account comes after
+function groupOrder(d, objs){
+  var seen = {}, order = (d.accounts || []).concat(["ckpt"]);
+  objs.forEach(function(o){ Object.keys(o || {}).forEach(function(k){ seen[k] = 1; }); });
+  Object.keys(seen).forEach(function(k){ if (order.indexOf(k) < 0) order.push(k); });
+  return order.filter(function(k){ return seen[k]; });
+}
+function groupColor(d, g){
+  if (g === "ckpt") return "var(--unk)";
+  var i = (d.accounts || []).indexOf(g);
+  return ["var(--sea)", "var(--grp2)"][i] || "var(--line)";
+}
+function groupLine(d, obj, digits){
+  var ks = groupOrder(d, [obj]).filter(function(k){ return obj[k] >= 0.5; });
+  if (!ks.length) return null;
+  return el("div", {cls:"grp"}, ks.map(function(k){
+    var dot = el("i"); dot.style.background = groupColor(d, k);
+    return el("span", {}, [dot, k + " " + fmt(obj[k], digits)]);
+  }));
+}
 var PROBLEM_LABELS = {FAILED:"failed", TIMEOUT:"timed out", OUT_OF_MEMORY:"out of memory", PREEMPTED:"preempted", CANCELLED:"cancelled", NODE_FAIL:"node failed", BOOT_FAIL:"boot failed", DEADLINE:"deadline"};
 function renderKloneUsers(r){
   if (!r.ok){
@@ -597,23 +621,33 @@ function renderKloneUsers(r){
       var share = w.cpu_hours ? Math.round(w.ckpt_cpu_hours / w.cpu_hours * 100) : 0;
       return el("tr", {}, [
         el("td", {cls: u.lab ? "" : "muted", text: u.user}),
-        el("td", {cls:"r num", title: parts}, [n.running ? n.cpus + " CPU, " + Math.round(n.mem_gb) + " GB" : el("span", {cls:"muted", text:"–"}), n.running ? el("div", {cls:"muted", style:"font-size:12px", text: n.running + (n.running === 1 ? " job" : " jobs")}) : null]),
+        el("td", {cls:"r num", title: parts}, [n.running ? n.cpus + " CPU, " + Math.round(n.mem_gb) + " GB" : el("span", {cls:"muted", text:"–"}),
+          n.running ? (n.groups ? groupLine(d, n.groups, 0) : null) : null,
+          n.running ? el("div", {cls:"muted", style:"font-size:12px", text: n.running + (n.running === 1 ? " job" : " jobs")}) : null]),
         el("td", {cls:"r num", title: reasons}, [n.pending ? n.pending + (n.pending === 1 ? " job" : " jobs") : el("span", {cls:"muted", text:"–"}), reasons ? el("div", {cls:"muted", style:"font-size:12px", text: reasons}) : null]),
-        el("td", {cls:"r num"}, [fmt(w.cpu_hours, 0), w.ckpt_cpu_hours ? el("div", {cls:"muted", style:"font-size:12px", text: share + "% on ckpt"}) : null]),
+        el("td", {cls:"r num"}, [fmt(w.cpu_hours, 0), w.groups ? groupLine(d, w.groups, 0) : (w.ckpt_cpu_hours ? el("div", {cls:"muted", style:"font-size:12px", text: share + "% on ckpt"}) : null)]),
         el("td", {cls:"muted", style:"font-size:13px", text: probs.length ? probs.join(", ") + " of " + w.jobs : (w.jobs ? "none of " + w.jobs : "")})
       ]);
     }))
   ])]));
   if (days.length){
-    var max = Math.max.apply(null, days.map(function(x){ return x.own + x.ckpt; }).concat(1));
-    nodes.push(el("h4", {cls:"mini"}, ["Lab CPU-hours per day", el("i", {cls:"key", style:"background:var(--sea)"}), "own nodes", el("i", {cls:"key", style:"background:var(--unk)"}), "ckpt"]));
-    nodes.push(el("div", {cls:"days"}, days.map(function(x){
-      var t = new Date(x.date + "T12:00:00"), total = x.own + x.ckpt;
-      var own = el("b", {cls:"own"}), ck = el("b", {cls:"ck"});
-      own.style.height = (x.own / max * 100) + "%"; ck.style.height = (x.ckpt / max * 100) + "%";
-      return el("div", {cls:"col", title: x.date + ": " + fmt(x.own, 0) + " own, " + fmt(x.ckpt, 0) + " ckpt"}, [
+    // older snapshots only split own nodes vs ckpt
+    var dg = days.map(function(x){ return x.groups || {own: x.own, ckpt: x.ckpt}; });
+    var order = days[0].groups ? groupOrder(d, dg) : ["own", "ckpt"];
+    var color = function(g){ return g === "own" ? "var(--sea)" : groupColor(d, g); };
+    var max = Math.max.apply(null, dg.map(function(g){ return order.reduce(function(a, k){ return a + (g[k] || 0); }, 0); }).concat(1));
+    var key = ["Lab CPU-hours per day"];
+    order.forEach(function(g){ var i = el("i", {cls:"key"}); i.style.background = color(g); key.push(i, g === "own" ? "own nodes" : g); });
+    nodes.push(el("h4", {cls:"mini"}, key));
+    nodes.push(el("div", {cls:"days"}, days.map(function(x, di){
+      var g = dg[di], t = new Date(x.date + "T12:00:00");
+      var total = order.reduce(function(a, k){ return a + (g[k] || 0); }, 0);
+      // the stack fills from the bottom, so the first group goes last
+      var segs = order.slice().reverse().map(function(k){ var b = el("b"); b.style.height = ((g[k] || 0) / max * 100) + "%"; b.style.background = color(k); return b; });
+      var detail = order.map(function(k){ return (k === "own" ? "own nodes" : k) + " " + fmt(g[k] || 0, 0); }).join(", ");
+      return el("div", {cls:"col", title: x.date + ": " + detail}, [
         el("span", {cls:"num", text: total >= 1 ? fmt(total, 0) : ""}),
-        el("div", {cls:"stack", role:"img", "aria-label": x.date + ": " + fmt(total, 0) + " CPU-hours"}, [ck, own]),
+        el("div", {cls:"stack", role:"img", "aria-label": x.date + ": " + fmt(total, 0) + " CPU-hours (" + detail + ")"}, segs),
         el("span", {text: t.toLocaleDateString([], {weekday:"short"})})
       ]);
     })));

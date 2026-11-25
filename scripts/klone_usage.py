@@ -111,6 +111,13 @@ def main(out_path):
     def other(account):
         return "other " + (base_account(account, ACCOUNTS) or account)
 
+    def group(j):
+        """Where the CPUs came from: "ckpt", or the lab account (srlab, coenv)."""
+        return "ckpt" if is_ckpt(j["Partition"]) else (base_account(j["Account"], ACCOUNTS) or j["Account"])
+
+    def add(d, k, v):
+        d[k] = d.get(k, 0) + v
+
     def who(j):
         return j["User"] if j["User"] in lab else other(j["Account"])
 
@@ -132,16 +139,17 @@ def main(out_path):
 
     days = [start.date() + dt.timedelta(days=i) for i in range(WINDOW_D)]
     day_idx = {d: i for i, d in enumerate(days)}
-    per_day = [{"date": d.isoformat(), "own": 0.0, "ckpt": 0.0} for d in days]
+    per_day = [{"date": d.isoformat(), "own": 0.0, "ckpt": 0.0, "groups": {}} for d in days]
 
     users = {}
     for j in jobs:
         name = who(j)
         u = users.setdefault(name, {
             "user": name, "lab": name in lab,
-            "now": {"running": 0, "pending": 0, "cpus": 0, "mem_gb": 0.0, "pending_cpus": 0, "partitions": {}},
-            "window": {"cpu_hours": 0.0, "ckpt_cpu_hours": 0.0, "jobs": 0, "completed": 0, "problems": {}}})
+            "now": {"running": 0, "pending": 0, "cpus": 0, "mem_gb": 0.0, "pending_cpus": 0, "partitions": {}, "groups": {}},
+            "window": {"cpu_hours": 0.0, "ckpt_cpu_hours": 0.0, "groups": {}, "jobs": 0, "completed": 0, "problems": {}}})
         ckpt = is_ckpt(j["Partition"])
+        g = group(j)
         st = j["State"]
         if st == "RUNNING":
             n = u["now"]
@@ -150,7 +158,8 @@ def main(out_path):
             n["cpus"] += cpus
             n["mem_gb"] += mem_gb(tres(j["AllocTRES"], "mem")) or 0
             key = j["Account"] + "/" + j["Partition"]
-            n["partitions"][key] = n["partitions"].get(key, 0) + cpus
+            add(n["partitions"], key, cpus)
+            add(n["groups"], g, cpus)
         elif st == "PENDING":
             u["now"]["pending"] += 1
             u["now"]["pending_cpus"] += int(j["ReqCPUS"] or 0)
@@ -165,6 +174,7 @@ def main(out_path):
         hours = cpus * (t1 - t0).total_seconds() / 3600
         w = u["window"]
         w["cpu_hours"] += hours
+        add(w["groups"], g, hours)
         if ckpt:
             w["ckpt_cpu_hours"] += hours
         if st != "RUNNING":
@@ -178,7 +188,9 @@ def main(out_path):
             nxt = min(t1, dt.datetime.combine(t.date() + dt.timedelta(days=1), dt.time()))
             i = day_idx.get(t.date())
             if i is not None and u["lab"]:
-                per_day[i]["ckpt" if ckpt else "own"] += cpus * (nxt - t).total_seconds() / 3600
+                h = cpus * (nxt - t).total_seconds() / 3600
+                per_day[i]["ckpt" if ckpt else "own"] += h
+                add(per_day[i]["groups"], g, h)
             t = nxt
 
     for name, rs in reasons.items():
@@ -190,8 +202,10 @@ def main(out_path):
         u["now"]["mem_gb"] = round(u["now"]["mem_gb"], 1)
         u["window"]["cpu_hours"] = round(u["window"]["cpu_hours"], 1)
         u["window"]["ckpt_cpu_hours"] = round(u["window"]["ckpt_cpu_hours"], 1)
+        u["window"]["groups"] = {k: round(v, 1) for k, v in u["window"]["groups"].items()}
     for d in per_day:
         d["own"], d["ckpt"] = round(d["own"], 1), round(d["ckpt"], 1)
+        d["groups"] = {k: round(v, 1) for k, v in d["groups"].items()}
 
     doc = {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
