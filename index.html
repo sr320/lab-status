@@ -597,6 +597,35 @@ function groupLine(d, obj, digits){
     return el("span", {}, [dot, k + " " + fmt(obj[k], digits)]);
   }));
 }
+var JOBS_SHOWN = 15;
+var REASON_LABELS = {AssocGrpCpuLimit:"account CPU limit", AssocGrpMemLimit:"account memory limit", AssocGrpCPUMinutesLimit:"account CPU-time limit",
+  Dependency:"waiting on another job", BeginTime:"scheduled start", Priority:"behind higher priority", Resources:"waiting for free nodes",
+  QOSMaxCpuPerUserLimit:"per-user CPU limit", JobHeldUser:"held", JobHeldAdmin:"held by admin", DependencyNeverSatisfied:"dependency failed"};
+function jobsTable(d){
+  var jobs = d.jobs || [], total = d.jobs_total || jobs.length;
+  if (!jobs.length) return [];
+  var shown = jobs.slice(0, JOBS_SHOWN), multi = {};
+  shown.forEach(function(j){ multi[j.user] = 1; });
+  var showUser = Object.keys(multi).length > 1;
+  var head = (showUser ? ["Person"] : []).concat(["Job", "Partition", "State", "Running", "Node or reason"]);
+  var nodes = [el("h4", {cls:"mini", text:"Jobs now"})];
+  nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [
+    el("thead", {}, [el("tr", {}, head.map(function(h){ return el("th", {cls: h === "Running" ? "r" : "", text:h}); }))]),
+    el("tbody", {}, shown.map(function(j){
+      var run = j.state === "RUNNING", dot = el("i"); dot.style.background = groupColor(d, j.group);
+      var cells = (showUser ? [el("td", {text:j.user})] : []).concat([
+        el("td", {title: "job " + j.id}, [j.name, el("div", {cls:"muted", style:"font-size:12px", text: j.id + (j.cpus ? " · " + j.cpus + " CPU" : "")})]),
+        el("td", {cls:"grp", style:"font-size:13px"}, [dot, j.partition]),
+        el("td", {}, [pill(run ? "ok" : "unk", run ? "running" : j.state === "PENDING" ? "waiting" : j.state.toLowerCase())]),
+        el("td", {cls:"r num", text: run && j.elapsed_s != null ? dur(j.elapsed_s) : "–"}),
+        el("td", {cls:"muted", style:"font-size:13px", text: run ? (j.nodes || "") : (REASON_LABELS[j.reason] || j.reason || "")})
+      ]);
+      return el("tr", {}, cells);
+    }))
+  ])]));
+  if (total > shown.length) nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:13px", text: "+" + (total - shown.length) + " more jobs not shown."}));
+  return nodes;
+}
 var PROBLEM_LABELS = {FAILED:"failed", TIMEOUT:"timed out", OUT_OF_MEMORY:"out of memory", PREEMPTED:"preempted", CANCELLED:"cancelled", NODE_FAIL:"node failed", BOOT_FAIL:"boot failed", DEADLINE:"deadline"};
 function renderKloneUsers(r){
   if (!r.ok){
@@ -652,6 +681,7 @@ function renderKloneUsers(r){
       ]);
     })));
   }
+  nodes = nodes.concat(jobsTable(d));
   nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "From sacct and squeue on " + (d.accounts || []).join(" and ") + ", pushed hourly. Days start at midnight; today is so far. People outside the lab on shared accounts are grouped as \"other\"."}));
   body("p-kloneusers", nodes);
 }

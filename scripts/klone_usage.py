@@ -2,8 +2,10 @@
 
 Runs on klone (see klone_usage.sh). One `sacct` call covers the last WINDOW_D
 days plus everything running or pending now; `squeue` adds why pending jobs
-are waiting. Only usernames, partitions, states and resource counts are
-recorded -- never job names, paths or command lines.
+are waiting and lists lab members' current jobs. Usernames, partitions,
+states, nodes and resource counts are recorded. Job names are kept only for
+lab members' current jobs, cut to the last path part and NAME_MAX characters;
+paths and command lines are never recorded.
 
 Accounts like coenv are shared with other labs, so only lab members are named:
 anyone in LAB_USERS (env KLONE_USERS, comma-separated), plus anyone who ran a
@@ -23,6 +25,8 @@ ACCOUNTS = os.environ.get("KLONE_ACCOUNTS", "srlab,coenv").split(",")
 LAB_ACCOUNTS = set(os.environ.get("KLONE_LAB_ACCOUNTS", "srlab").split(","))
 LAB_USERS = {u for u in os.environ.get("KLONE_USERS", "").split(",") if u}
 WINDOW_D = int(os.environ.get("KLONE_WINDOW_D", "7"))
+NAME_MAX = 24
+JOBS_MAX = 200
 
 SACCT_FIELDS = ["JobIDRaw", "User", "Account", "Partition", "State", "AllocCPUS", "ReqCPUS",
                 "AllocTRES", "ReqMem", "Start", "End", "Submit"]
@@ -72,6 +76,24 @@ def base_account(account, names):
         if account == n or n in parts:
             return n
     return None
+
+
+def tidy_name(name):
+    """'$HOME/bin/hyakalloc_snapshot.sh' -> 'hyakalloc_snapshot.sh', then shorten."""
+    name = name.rstrip("/").split("/")[-1] or "?"
+    return name if len(name) <= NAME_MAX else name[:NAME_MAX - 1] + "\u2026"
+
+
+def seconds(t):
+    """squeue %M: 'M:SS', 'H:MM:SS' or 'D-HH:MM:SS' -> seconds; None otherwise."""
+    try:
+        d, _, hms = t.rpartition("-")
+        parts = [int(x) for x in hms.split(":")]
+        while len(parts) < 3:
+            parts.insert(0, 0)
+        return (int(d) if d else 0) * 86400 + parts[0] * 3600 + parts[1] * 60 + parts[2]
+    except ValueError:
+        return None
 
 
 def is_ckpt(partition):
@@ -136,6 +158,30 @@ def main(out_path):
                 continue
             pend_seen.add(i)
             reasons[u if u in lab else other(a)][r or "unknown"] += 1
+
+    # lab members' running and pending jobs, one row each
+    job_rows = []
+    if lab:
+        try:
+            out = run(["squeue", "-h", "-u", ",".join(sorted(lab)), "-o", "%i|%u|%a|%P|%j|%T|%M|%C|%R"])
+        except (subprocess.SubprocessError, OSError):
+            out = ""
+        for line in out.splitlines():
+            cells = line.split("|", 8)
+            if len(cells) != 9:
+                continue
+            i, u, a, part, name, state, elapsed, cpus, where = cells
+            running = state == "RUNNING"
+            job_rows.append({
+                "id": i, "user": u, "partition": part,
+                "group": "ckpt" if is_ckpt(part) else (base_account(a, ACCOUNTS) or a),
+                "name": tidy_name(name), "state": state,
+                "elapsed_s": seconds(elapsed) if running else None,
+                "cpus": int(cpus) if cpus.isdigit() else None,
+                "nodes": where if running else None,
+                "reason": None if running else where.strip("()"),
+            })
+        job_rows.sort(key=lambda j: (j["state"] != "RUNNING", -(j["elapsed_s"] or 0), j["id"]))
 
     days = [start.date() + dt.timedelta(days=i) for i in range(WINDOW_D)]
     day_idx = {d: i for i, d in enumerate(days)}
@@ -213,6 +259,8 @@ def main(out_path):
         "window_days": WINDOW_D,
         "users": rows,
         "days": per_day,  # lab members only
+        "jobs": job_rows[:JOBS_MAX],
+        "jobs_total": len(job_rows),
     }
     with open(out_path, "w") as f:
         json.dump(doc, f, indent=1)
