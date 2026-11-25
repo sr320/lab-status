@@ -144,6 +144,19 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
   h3{font-size:15px;min-height:28px;align-items:center}
   h3 .chev{padding:6px 8px;margin-right:-8px}
   [data-body].clip{max-height:260px}
+  table.cards thead{display:none}
+  table.cards tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;padding:7px 0;border-bottom:1px solid var(--line)}
+  table.cards tr:last-child{border-bottom:0}
+  table.cards td{display:block;border:0;padding:0;text-align:left;min-width:0;overflow-wrap:anywhere}
+  table.cards td:first-child{grid-column:1/-1;font-weight:700;font-size:14px}
+  table.cards td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-size:11px;font-weight:400;color:var(--muted);line-height:1.3}
+  table.cards .grp{white-space:normal}
+  table.cards .grp i:first-child{margin-left:0}
+  table.cards.jobs tr{grid-template-columns:repeat(3,minmax(0,1fr))}
+  table.cards.jobs td:last-child{grid-column:span 2}
+  table.cards.alloc tr{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}
+  table.cards.alloc td:first-child{grid-column:1}
+  table.cards.alloc td:last-child{grid-column:2;grid-row:1;width:auto!important}
 }
 @media (prefers-reduced-motion:no-preference){.light,.pill{transition:border-color .3s,background .3s}}
 </style>
@@ -405,7 +418,14 @@ function setAge(id, iso, staleH){
   a.classList.toggle("stale", h != null && staleH != null && h > staleH);
   if (iso) a.title = new Date(iso).toLocaleString();
 }
-function body(id, nodes){ var b = $("#" + id + " [data-body]"); b.replaceChildren.apply(b, nodes); }
+function body(id, nodes){
+  var b = $("#" + id + " [data-body]"); b.replaceChildren.apply(b, nodes);
+  // on phones .cards tables stack each row; the header text becomes a label on each cell
+  b.querySelectorAll("table.cards").forEach(function(t){
+    var hs = Array.prototype.map.call(t.querySelectorAll("thead th"), function(h){ return h.textContent; });
+    t.querySelectorAll("tbody tr").forEach(function(tr){ Array.prototype.forEach.call(tr.children, function(td, i){ if (hs[i]) td.setAttribute("data-label", hs[i]); }); });
+  });
+}
 function fail(id, msg){ body(id, [el("p", {cls:"err", text: msg})]); setAge(id, null); }
 
 function spark(values, band){
@@ -650,7 +670,7 @@ function jobsTable(d){
   var showUser = Object.keys(multi).length > 1;
   var head = (showUser ? ["Person"] : []).concat(["Job", "Partition", "State", "Running", "Node or reason"]);
   var nodes = [el("h4", {cls:"mini", text:"Jobs now"})];
-  nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [
+  nodes.push(el("div", {cls:"scroll"}, [el("table", {cls:"cards jobs"}, [
     el("thead", {}, [el("tr", {}, head.map(function(h){ return el("th", {cls: h === "Running" ? "r" : "", text:h}); }))]),
     el("tbody", {}, shown.map(function(j){
       var run = j.state === "RUNNING", dot = el("i"); dot.style.background = groupColor(d, j.group);
@@ -681,7 +701,7 @@ function renderKloneUsers(r){
   var nodes = [];
   var rows = users.filter(function(u){ return u.now.running || u.now.pending || u.window.cpu_hours >= 0.1; });
   if (!rows.length) nodes.push(el("p", {cls:"muted", text:"No jobs on " + (d.accounts || []).join(", ") + " in the last " + wd + " days."}));
-  else nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [
+  else nodes.push(el("div", {cls:"scroll"}, [el("table", {cls:"cards"}, [
     el("thead", {}, [el("tr", {}, [el("th", {text:"Person"}), el("th", {cls:"r", text:"Running now"}), el("th", {cls:"r", text:"Waiting"}), el("th", {cls:"r", text:"CPU-h, " + wd + " days"}), el("th", {text:"Ended badly"})])]),
     el("tbody", {}, rows.map(function(u){
       var n = u.now, w = u.window;
@@ -743,7 +763,7 @@ function renderKlone(ext){
       el("td", {style:"width:24%"}, [bar(pct, lv)])
     ]);
   });
-  var nodes = [el("div", {cls:"scroll"}, [el("table", {}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Partition"}), el("th", {cls:"r", text:"CPU in use"}), el("th", {cls:"r", text:"Memory"}), el("th", {text:""})])]), el("tbody", {}, rows)])])];
+  var nodes = [el("div", {cls:"scroll"}, [el("table", {cls:"cards alloc"}, [el("thead", {}, [el("tr", {}, [el("th", {text:"Partition"}), el("th", {cls:"r", text:"CPU in use"}), el("th", {cls:"r", text:"Memory"}), el("th", {text:""})])]), el("tbody", {}, rows)])])];
   if (k.checkpoint) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text: "Idle on ckpt across Hyak: " + k.checkpoint.idle_cpus + " CPUs, " + k.checkpoint.idle_gpus + " GPUs."}));
   body("p-klone", nodes);
   if (hoursSince(k.generated) > DAILY_STALE_H) issue("klone", "warn", "hyakalloc snapshot is " + ago(k.generated));
