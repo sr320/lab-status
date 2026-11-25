@@ -4,6 +4,7 @@ name: Scrape lab calendar
 # "in lab" events to in-lab.json on the calendar-data branch, along with
 # claude.json (the last month of Claude Code commits across lab repos),
 # github.json (the last week of commits to RobertsLab repos),
+# notebooks.json (the latest post in each notebook on robertslab.info/notebooks.html),
 # ttn-gateway.json (the TTN gateway's console stats, read with the TTN_API_KEY secret) and
 # ttn-sensor.json (the last day of little-dragon-01 readings, read with the TTN_APP_API_KEY secret).
 on:
@@ -39,6 +40,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - run: python scripts/github_activity.py out/github.json
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: python scripts/notebooks.py out/notebooks.json
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}

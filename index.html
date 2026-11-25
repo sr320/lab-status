@@ -58,6 +58,11 @@ button:disabled{cursor:progress;color:var(--muted);border-color:var(--line)}
 .now{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
 .now span{background:var(--ok-bg);color:var(--ok);font-weight:700;padding:3px 10px;border-radius:999px}
 .now span small{font-weight:400;margin-left:4px}
+.nbgrid{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 18px}
+.nbgrid li{font-size:13px;min-width:0;padding:4px 0;border-bottom:1px solid var(--line)}
+.nbgrid li b{font-size:14px}
+.nbgrid li .t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nbgrid li.old{opacity:.7}
 #p-inlab .days{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px;margin-top:8px;align-items:start}
 #p-inlab .days h4{font-size:13px;color:var(--muted);margin:0 0 2px;font-weight:700}
 #p-inlab .days ul{list-style:none;margin:0;padding:0;font-size:14px}
@@ -300,6 +305,13 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     </div>
   </div>
 
+  <h2 id="notebooks">Lab notebooks <a href="https://robertslab.info/notebooks.html" target="_blank" rel="noopener">robertslab.info/notebooks</a></h2>
+  <p class="sub">The latest post in each lab member's notebook, newest first. Checked every 15 minutes.</p>
+  <section class="panel" id="p-notebooks">
+    <h3>Latest posts <span class="age" data-age></span></h3>
+    <div data-body><p class="muted">Loading…</p></div>
+  </section>
+
   <h2 id="github">RobertsLab on GitHub <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">github.com/RobertsLab</a></h2>
   <p class="sub">Commits to the main branch of lab repos over the last week, leaving out bots and data branches.</p>
   <div class="cols">
@@ -337,6 +349,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
     <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
     <a href="https://sr320.github.io/safs-connector/" target="_blank" rel="noopener">SAFS Connector</a>, the
+    <a href="https://robertslab.info/notebooks.html" target="_blank" rel="noopener">lab notebook</a> feeds, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a>,
     <a href="https://packetbroker.net/" target="_blank" rel="noopener">Packet Broker</a>'s public gateway record and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
@@ -360,6 +373,8 @@ var KLONE_USAGE_RAW = "https://raw.githubusercontent.com/sr320/lab-status/klone-
 var KLONE_USAGE_STALE_H = 3;
 var INLAB_URL   = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/in-lab.json";
 var CLAUDE_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/claude.json";
+var NOTEBOOKS_URL = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/notebooks.json";
+var NOTEBOOK_ACTIVE_D = 14;
 var GITHUB_URL  = "https://raw.githubusercontent.com/sr320/lab-status/calendar-data/github.json";
 var CLAUDE_STATUS_URL = "https://status.claude.com/api/v2/summary.json";
 var CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=mrc305%40gmail.com&ctz=America%2FLos_Angeles";
@@ -960,6 +975,32 @@ function renderGitHub(r){
   }))] : [el("p", {cls:"muted", text:"No commits in the last week."})]);
 }
 
+/* ---------- Lab notebooks ---------- */
+function renderNotebooks(r){
+  if (!r.ok){ fail("p-notebooks", "No notebook summary yet (" + r.e.message + ")."); mark("Notebooks", "unk", "summary not reachable"); return; }
+  var d = r.v, nbs = d.notebooks || [];
+  setAge("p-notebooks", d.updated_at, 1);
+  var active = nbs.filter(function(n){ var h = hoursSince(n.last_post); return h != null && h <= NOTEBOOK_ACTIVE_D * 24; });
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Posted in 2 weeks", String(active.length), "of " + nbs.length),
+    reading("Posted in 7 days", String(nbs.filter(function(n){ var h = hoursSince(n.last_post); return h != null && h <= 168; }).length))
+  ])];
+  nodes.push(el("ul", {cls:"nbgrid"}, nbs.map(function(n){
+    var isActive = active.indexOf(n) >= 0;
+    var when = n.last_post ? ago(n.last_post) : "no recent post found";
+    return el("li", {cls: isActive ? "" : "old"}, [
+      el("span", {cls:"dot " + (isActive ? "ok" : ""), "aria-hidden":"true"}),
+      el("a", {href:n.url, target:"_blank", rel:"noopener"}, [el("b", {text:n.name})]),
+      el("span", {cls:"muted", text:" · " + when}),
+      n.title ? el("a", {cls:"t", href:n.post_url || n.url, target:"_blank", rel:"noopener", title:n.title, text:n.title})
+        : el("span", {cls:"t muted", text: n.via === "commit" ? "last commit to the notebook repo" : ""})
+    ]);
+  })));
+  body("p-notebooks", nodes);
+  if (hoursSince(d.updated_at) > 3) issue("Notebooks", "warn", "Notebook summary is " + ago(d.updated_at));
+  else mark("Notebooks", "ok", active.length + " of " + nbs.length + " posted in 2 weeks");
+}
+
 /* ---------- Claude ---------- */
 var CLAUDE_PARTS = ["claude.ai", "Claude Code", "Claude API (api.anthropic.com)"];
 var IMPACT = {none:"ok", minor:"warn", major:"bad", critical:"bad"};
@@ -1334,7 +1375,7 @@ function renderSentinel(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1444,7 +1485,8 @@ function load(){
     settle(getJSON(CPG_URL)),
     settle(getSentinel()),
     settle(getAcantha()),
-    settle(getSafs())
+    settle(getSafs()),
+    settle(getJSON(NOTEBOOKS_URL))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1455,7 +1497,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
