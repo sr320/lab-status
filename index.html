@@ -195,7 +195,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
   <div class="cols">
     <div>
       <h2>SHORE tank room <a href="http://ftr210.online" target="_blank" rel="noopener">ftr210.online</a></h2>
-      <p class="sub">Tankcam, the Seneye tank and water quality.</p>
+      <p class="sub">Tankcam, the Seneye tank, water quality and conditions at Thorndyke Bay.</p>
 
       <section class="panel" id="p-seneye">
         <h3>Seneye tank <span class="age" data-age></span></h3>
@@ -209,6 +209,11 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
 
       <section class="panel" id="p-wq">
         <h3>Water quality reports <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="p-acantha">
+        <h3>Thorndyke Bay <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> <span class="age" data-age></span></h3>
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
@@ -321,6 +326,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
+    <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a>,
     <a href="https://packetbroker.net/" target="_blank" rel="noopener">Packet Broker</a>'s public gateway record and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
@@ -361,6 +367,10 @@ var ATLAS_COMMITS_URL = "https://api.github.com/repos/sr320/conditioning-atlas/c
 var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
 var CPG_URL     = "https://sr320.github.io/project-cpg-me/data/dashboard.json";
 var CPG_REPO_URL = "https://github.com/sr320/project-cpg-me";
+// Project Acantha (RobertsLab/acantha) rebuilds these every 20 minutes for Thorndyke Bay.
+var ACANTHA_PAGE = "https://robertslab.github.io/acantha/";
+var ACANTHA_DATA = ACANTHA_PAGE + "data/";
+var ACANTHA_STALE_H = 2;
 // The Sentinel page embeds its summary as `const MODEL = {...};` (built by scripts/build_dashboard.py in sr320/framework-sentinel).
 var SENTINEL_URL = "https://sr320.github.io/framework-sentinel/";
 var SENTINEL_STALE_D = 14, SENTINEL_QUIET_D = 60;
@@ -1155,6 +1165,48 @@ function renderCpG(r){
   mark("CpG O/E", "ok", sp.length + " species, " + tested.length + "/" + focal.length + " GO Slim");
 }
 
+/* ---------- Thorndyke Bay (Project Acantha) ---------- */
+function getAcantha(){
+  var names = ["meta", "briefing", "tides", "alerts", "shellfish", "water"];
+  return Promise.all(names.map(function(n){ return n === "meta" ? getJSON(ACANTHA_DATA + n + ".json") : getJSON(ACANTHA_DATA + n + ".json").catch(function(){ return null; }); }))
+    .then(function(v){ var o = {}; names.forEach(function(n, i){ o[n] = v[i]; }); return o; });
+}
+function renderAcantha(r){
+  if (!r.ok){ fail("p-acantha", "Acantha data not reachable (" + r.e.message + ")."); mark("Thorndyke", "unk", "site not reachable"); return; }
+  var d = r.v, meta = d.meta || {}, now = Date.now();
+  setAge("p-acantha", meta.generated_at, ACANTHA_STALE_H);
+  var dayTime = function(t){ return new Date(t).toLocaleString([], {timeZone: LAB_TZ, weekday:"short", hour:"numeric", minute:"2-digit"}); };
+  var nodes = [];
+  var b = d.briefing;
+  if (b && b.configured && b.headline) nodes.push(el("p", {style:"margin:6px 0 2px;font-weight:700"}, [b.headline, el("span", {cls:"muted", style:"font-weight:400;font-size:12px", text:" · Claude's briefing, " + ago(b.generated_at)})]));
+  var readings = [];
+  var hilo = (d.tides && d.tides.hilo) || [];
+  var nextLow = hilo.filter(function(x){ return x.type === "L" && Date.parse(x.t) > now; })[0];
+  if (nextLow) readings.push(reading("Next low, " + dayTime(nextLow.t), fmt(nextLow.v, 1), "ft"));
+  var ws = d.water && d.water.stations && d.water.stations.filter(function(s){ return s.latest && s.latest.water_temp_c != null; })[0];
+  if (ws) readings.push(reading("Water, " + ws.name.replace(/\s*\(.*\)/, ""), fmt(ws.latest.water_temp_c, 1), "°C"));
+  if (readings.length) nodes.push(el("div", {cls:"readings"}, readings));
+  var sf = d.shellfish, z = sf && sf.site_zone, ga = sf && sf.site_growing_area;
+  if (z || ga) nodes.push(el("p", {style:"margin:6px 0 0;font-size:13px"}, [
+    z ? pill(z.closed ? "bad" : "ok", z.closed ? "Biotoxin closure" : "Biotoxin zone open") : null,
+    z && z.closed ? " " + z.status.replace(/^Closed:\s*/, "").replace(/,/g, ", ") : null,
+    ga ? el("span", {cls:"muted", text:(z ? " · " : "") + ga.name + ": " + ga.classification}) : null
+  ]));
+  var alerts = (d.alerts && d.alerts.alerts) || [];
+  if (alerts.length) nodes.push(el("ul", {cls:"plain"}, alerts.map(function(a){
+    var sev = a.severity === "Severe" || a.severity === "Extreme";
+    return el("li", {title: a.headline || ""}, [pill(sev ? "bad" : "warn", a.event), a.ends || a.expires ? el("span", {cls:"muted", text:" until " + dayTime(a.ends || a.expires)}) : null]);
+  })));
+  var bad = Object.keys(meta.sources || {}).filter(function(k){ return meta.sources[k] && meta.sources[k].ok === false; });
+  if (bad.length) nodes.push(el("p", {cls:"err", text:"Sources failing on the last run: " + bad.join(", ") + "."}));
+  nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, ["Advisory only; ", el("a", {href:"https://doh.wa.gov/community-and-environment/shellfish", target:"_blank", rel:"noopener", text:"check DOH"}), " before harvesting."]));
+  body("p-acantha", nodes);
+  var h = hoursSince(meta.generated_at);
+  if (h != null && h > ACANTHA_STALE_H) issue("Thorndyke", "warn", "Acantha data is " + ago(meta.generated_at).replace(" ago", "") + " old");
+  else if (bad.length) issue("Thorndyke", "warn", bad.length + " Acantha source" + (bad.length > 1 ? "s" : "") + " failing");
+  else mark("Thorndyke", "ok", (z && z.closed ? "biotoxin closure" : "open") + (alerts.length ? ", " + alerts[0].event : "") + (nextLow ? ", low " + fmt(nextLow.v, 1) + " ft" : ""));
+}
+
 /* ---------- Framework Sentinel ---------- */
 function getSentinel(){
   return fetch(SENTINEL_URL + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(t){
@@ -1197,7 +1249,7 @@ function renderSentinel(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1305,7 +1357,8 @@ function load(){
     settle(getJSON(SENSOR_URL)),
     settle(getKloneUsage()),
     settle(getJSON(CPG_URL)),
-    settle(getSentinel())
+    settle(getSentinel()),
+    settle(getAcantha())
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1316,7 +1369,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
