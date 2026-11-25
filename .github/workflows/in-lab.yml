@@ -11,8 +11,9 @@ on:
     - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
   push:
-    branches: [main]
-    paths: [scripts/in_lab.py, scripts/claude_activity.py, scripts/github_activity.py, scripts/ttn_gateway.py, scripts/ttn_sensor.py, .github/workflows/in-lab.yml]
+    # scrape-trigger is force-pushed by raven every 15 minutes (scripts/trigger_scrape.sh),
+    # because GitHub delays the schedule above by hours.
+    branches: [main, scrape-trigger]
 
 permissions:
   contents: write
@@ -26,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

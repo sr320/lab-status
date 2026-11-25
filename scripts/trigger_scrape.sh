@@ -1,19 +1,22 @@
 #!/bin/bash
 # Runs from sr320's crontab on raven every 15 minutes:
-#   */15 * * * * $HOME/lab-status-live/trigger_scrape.sh >> $HOME/lab-status-live/trigger_scrape.log 2>&1
+#   3,18,33,48 * * * * $HOME/lab-status-live/trigger_scrape.sh >> $HOME/lab-status-live/trigger_scrape.log 2>&1
 # Starts the "Scrape lab calendar" workflow, because GitHub delays the
-# workflow's own */15 schedule by hours. The token is a fine-grained PAT
-# limited to sr320/lab-status with only "Actions: Read and write".
+# workflow's own schedule by hours. It force-pushes a one-file commit to the
+# scrape-trigger branch with the same deploy key raven_live.sh uses; the
+# workflow runs on pushes to that branch (and checks out main).
 set -euo pipefail
 
-TOKEN_FILE="$HOME/.config/lab-status/dispatch_token"
-URL="https://api.github.com/repos/sr320/lab-status/actions/workflows/in-lab.yml/dispatches"
+KEY="$HOME/.ssh/lab_status_deploy"
+REPO="git@github.com:sr320/lab-status.git"
 
-code=$(timeout 60 curl -s -o /dev/null -w '%{http_code}' -X POST "$URL" \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
-  -d '{"ref":"main"}')
-if [ "$code" != 204 ]; then
-  echo "$(date -u +%FT%TZ) dispatch failed: HTTP $code"
-  exit 1
-fi
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+cd "$WORK"
+date -u +%FT%TZ > trigger
+git init -q -b scrape-trigger
+git -c user.name="raven" -c user.email="sr320@uw.edu" add trigger
+git -c user.name="raven" -c user.email="sr320@uw.edu" commit -qm "Trigger calendar scrape"
+GIT_SSH_COMMAND="ssh -i $KEY -o IdentitiesOnly=yes -o BatchMode=yes" \
+  timeout 60 git push -qf "$REPO" scrape-trigger
