@@ -282,6 +282,15 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     </div>
 
     <div>
+      <h2>SAFS Connector <a href="https://sr320.github.io/safs-connector/#search" target="_blank" rel="noopener">safs-connector</a></h2>
+      <p class="sub">Publications by UW School of Aquatic and Fishery Sciences faculty: who works on what, and with whom.</p>
+      <section class="panel" id="p-safs">
+        <h3>Papers and search <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+
+    <div>
       <h2>Framework Sentinel <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">framework-sentinel</a></h2>
       <p class="sub">Weekly literature sweep in marine invertebrate environmental epigenetics, scored against the framework's ten unresolved questions.</p>
       <section class="panel" id="p-sentinel">
@@ -327,6 +336,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
     <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
+    <a href="https://sr320.github.io/safs-connector/" target="_blank" rel="noopener">SAFS Connector</a>, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a>,
     <a href="https://packetbroker.net/" target="_blank" rel="noopener">Packet Broker</a>'s public gateway record and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
@@ -367,6 +377,9 @@ var ATLAS_COMMITS_URL = "https://api.github.com/repos/sr320/conditioning-atlas/c
 var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
 var CPG_URL     = "https://sr320.github.io/project-cpg-me/data/dashboard.json";
 var CPG_REPO_URL = "https://github.com/sr320/project-cpg-me";
+// SAFS Connector: meta and the weekly blog load with the page; works.json (~800 KB) only when someone searches.
+var SAFS_PAGE = "https://sr320.github.io/safs-connector/";
+var SAFS_STALE_D = 14, SAFS_HITS = 8;
 // Project Acantha (RobertsLab/acantha) rebuilds these every 20 minutes for Thorndyke Bay.
 var ACANTHA_PAGE = "https://robertslab.github.io/acantha/";
 var ACANTHA_DATA = ACANTHA_PAGE + "data/";
@@ -1165,6 +1178,78 @@ function renderCpG(r){
   mark("CpG O/E", "ok", sp.length + " species, " + tested.length + "/" + focal.length + " GO Slim");
 }
 
+/* ---------- SAFS Connector ---------- */
+function getSafs(){
+  return Promise.all([getJSON(SAFS_PAGE + "data/meta.json"), getJSON(SAFS_PAGE + "data/blog.json").catch(function(){ return null; })])
+    .then(function(v){ return {meta: v[0], blog: v[1]}; });
+}
+var safsFac = {}, safsWorks = null, safsBox = null;
+function safsSearchBox(){
+  if (safsBox) return safsBox;   // kept across refreshes so a search in progress survives the 5-minute reload
+  var input = el("input", {type:"search", placeholder:"Search SAFS papers: words in the title or summary", "aria-label":"Search SAFS papers",
+    style:"width:100%;font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"});
+  var out = el("div", {"aria-live":"polite"});
+  var t;
+  function run(){
+    var terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length){ out.replaceChildren(); return; }
+    if (!safsWorks){
+      out.replaceChildren(el("p", {cls:"muted", style:"margin:6px 0 0;font-size:13px", text:"Loading the paper list…"}));
+      getJSON(SAFS_PAGE + "data/works.json").then(function(w){
+        var c = {}; w.cols.forEach(function(k, i){ c[k] = i; });
+        safsWorks = w.rows.map(function(r){
+          return {title:r[c.title], year:r[c.year], venue:r[c.venue], doi:r[c.doi], id:r[c.id], faculty:r[c.faculty] || [],
+            text:[r[c.title], r[c.venue], r[c.summary], (r[c.faculty] || []).map(function(f){ return safsFac[f] || f; }).join(" ")].join(" ").toLowerCase()};
+        }).sort(function(a, b){ return b.year - a.year; });
+        run();
+      }, function(e){ out.replaceChildren(el("p", {cls:"err", text:"Couldn't load the paper list (" + e.message + ")."})); });
+      return;
+    }
+    var hits = safsWorks.filter(function(w){ return terms.every(function(x){ return w.text.indexOf(x) >= 0; }); });
+    out.replaceChildren(el("p", {cls:"muted", style:"margin:6px 0 0;font-size:13px", text: hits.length.toLocaleString("en-US") + (hits.length === 1 ? " paper" : " papers") + (hits.length > SAFS_HITS ? ", newest " + SAFS_HITS + " shown" : "")}),
+      el("ul", {cls:"plain"}, hits.slice(0, SAFS_HITS).map(function(w){
+        var href = w.doi ? "https://doi.org/" + w.doi : "https://openalex.org/" + w.id;
+        return el("li", {}, [el("a", {href:href, target:"_blank", rel:"noopener", text:w.title}),
+          el("div", {cls:"muted", style:"font-size:12px", text: w.year + (w.venue ? " · " + w.venue : "") + " · " + w.faculty.map(function(f){ return safsFac[f] || f; }).join(", ")})]);
+      })));
+  }
+  input.addEventListener("input", function(){
+    // results would land below the panel's clip, so a search shows the whole panel
+    var sec = $("#p-safs"), more = $("button.more", sec);
+    sec.dataset.expanded = "1"; $("[data-body]", sec).classList.remove("clip"); if (more) more.remove();
+    clearTimeout(t); t = setTimeout(run, 200);
+  });
+  safsBox = el("div", {style:"margin-top:10px"}, [input, out]);
+  return safsBox;
+}
+function renderSafs(r){
+  if (!r.ok){ fail("p-safs", "SAFS Connector not reachable (" + r.e.message + ")."); mark("SAFS", "unk", "site not reachable"); return; }
+  var m = r.v.meta, posts = (r.v.blog && r.v.blog.posts) || [];
+  (m.faculty || []).forEach(function(f){ safsFac[f.slug] = f.name; });
+  var builtIso = m.built ? m.built + "T12:00:00" : null;
+  setAge("p-safs", builtIso, SAFS_STALE_D * 24);
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Papers", Number(m.n_works).toLocaleString("en-US")),
+    reading("Faculty", String((m.faculty || []).length)),
+    reading("Themes", String((m.themes || []).length)),
+    reading("Partner orgs", Object.keys(m.orgs || {}).length.toLocaleString("en-US"))
+  ])];
+  nodes.push(safsSearchBox());
+  if (posts.length){
+    var week = posts[0].week, latest = posts.filter(function(p){ return p.week === week; });
+    nodes.push(el("h4", {cls:"mini", text:"Paper of the week, " + (posts[0].date || week)}));
+    nodes.push(el("ul", {cls:"plain"}, latest.map(function(p){
+      return el("li", {}, [el("a", {href: SAFS_PAGE + "#blog", target:"_blank", rel:"noopener", text: p.headline || p.title}),
+        el("div", {cls:"muted", style:"font-size:12px", text: (safsFac[p.faculty] || p.faculty) + (p.venue ? " · " + p.venue : "")})]);
+    })));
+  }
+  nodes.push(el("p", {style:"margin:8px 0 0;font-size:13px"}, [el("a", {href: SAFS_PAGE + "#search", target:"_blank", rel:"noopener", text:"Full search, network and maps"}), el("span", {cls:"muted", text:" · data from OpenAlex"})]));
+  body("p-safs", nodes);
+  var h = hoursSince(builtIso);
+  if (h != null && h > SAFS_STALE_D * 24) issue("SAFS", "warn", "SAFS Connector data built " + ago(builtIso));
+  else mark("SAFS", "ok", Number(m.n_works).toLocaleString("en-US") + " papers, " + (m.faculty || []).length + " faculty");
+}
+
 /* ---------- Thorndyke Bay (Project Acantha) ---------- */
 function getAcantha(){
   var names = ["meta", "briefing", "tides", "alerts", "shellfish", "water"];
@@ -1249,7 +1334,7 @@ function renderSentinel(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1358,7 +1443,8 @@ function load(){
     settle(getKloneUsage()),
     settle(getJSON(CPG_URL)),
     settle(getSentinel()),
-    settle(getAcantha())
+    settle(getAcantha()),
+    settle(getSafs())
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1369,7 +1455,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
