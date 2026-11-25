@@ -65,8 +65,7 @@ button:disabled{cursor:progress;color:var(--muted);border-color:var(--line)}
 
 /* columns */
 .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
-.cols.four{grid-template-columns:repeat(4,minmax(0,1fr));gap:0 12px}
-@media (max-width:1100px){.cols.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cols.four{grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:0 12px}
 @media (max-width:760px){.cols,.cols.four,.top{grid-template-columns:minmax(0,1fr)}}
 .cols>*,.top>*{min-width:0}
 h2{font:700 19px/1.2 var(--serif);margin:14px 0 2px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
@@ -276,6 +275,15 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
+
+    <div>
+      <h2>Framework Sentinel <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">framework-sentinel</a></h2>
+      <p class="sub">Weekly literature sweep in marine invertebrate environmental epigenetics, scored against the framework's ten unresolved questions.</p>
+      <section class="panel" id="p-sentinel">
+        <h3>Scorecard <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
   </div>
 
   <h2 id="github">RobertsLab on GitHub <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">github.com/RobertsLab</a></h2>
@@ -312,6 +320,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">White Whale dashboard</a>, the
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
+    <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
     <a href="https://github.com/RobertsLab" target="_blank" rel="noopener">RobertsLab GitHub</a>,
     <a href="https://packetbroker.net/" target="_blank" rel="noopener">Packet Broker</a>'s public gateway record and
     <a href="https://status.claude.com" target="_blank" rel="noopener">status.claude.com</a>.
@@ -352,6 +361,9 @@ var ATLAS_COMMITS_URL = "https://api.github.com/repos/sr320/conditioning-atlas/c
 var ATLAS_REPO_URL = "https://github.com/sr320/conditioning-atlas";
 var CPG_URL     = "https://sr320.github.io/project-cpg-me/data/dashboard.json";
 var CPG_REPO_URL = "https://github.com/sr320/project-cpg-me";
+// The Sentinel page embeds its summary as `const MODEL = {...};` (built by scripts/build_dashboard.py in sr320/framework-sentinel).
+var SENTINEL_URL = "https://sr320.github.io/framework-sentinel/";
+var SENTINEL_STALE_D = 14, SENTINEL_QUIET_D = 60;
 // The Things Network shares gateway status with Packet Broker's public mapper, which needs no key and allows cross-origin reads.
 // It refreshes every 4 to 12 minutes; rxRate and txRate are packets per hour (its OpenAPI text says per second, which is wrong).
 var TTN_GATEWAY_URL = "https://mapper.packetbroker.net/api/v2/gateways/netID=000013,tenantID=ttn,id=sr320-indoor-01";
@@ -1143,8 +1155,49 @@ function renderCpG(r){
   mark("CpG O/E", "ok", sp.length + " species, " + tested.length + "/" + focal.length + " GO Slim");
 }
 
+/* ---------- Framework Sentinel ---------- */
+function getSentinel(){
+  return fetch(SENTINEL_URL + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(t){
+    var i = t.indexOf("const MODEL = "); if (i < 0) throw new Error("summary not found on the page");
+    i += 14;
+    var j = t.indexOf(";\nconst ", i); if (j < 0) j = t.indexOf("<\/script>", i);
+    return JSON.parse(t.slice(i, j).replace(/;\s*$/, ""));
+  });
+}
+function renderSentinel(r){
+  if (!r.ok){ fail("p-sentinel", "Framework Sentinel not reachable (" + r.e.message + ")."); mark("Sentinel", "unk", "site not reachable"); return; }
+  var m = r.v, qs = m.questions || [], ls = m.last_sweep || {}, vc = m.verdict_counts || {};
+  if (!qs.length){ fail("p-sentinel", "Framework Sentinel loaded but its summary layout wasn't recognised."); mark("Sentinel", "unk", "data layout changed"); return; }
+  var sweepIso = ls.sweep_date ? ls.sweep_date + "T12:00:00" : null;
+  setAge("p-sentinel", sweepIso, SENTINEL_STALE_D * 24);
+  var days = function(d){ return d ? Math.floor((Date.now() - Date.parse(d + "T12:00:00")) / 864e5) : null; };
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Papers scored", String(m.entries_count)),
+    reading("Confirms", String(vc.Confirms || 0)),
+    reading("Complicates", String(vc.Complicates || 0)),
+    reading("Extends", String(vc.Extends || 0))
+  ])];
+  if (ls.sweep_date) nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:13px", text:
+    "Last sweep " + ls.sweep_date + ": " + (ls.papers_screened != null ? ls.papers_screened.toLocaleString("en-US") + " screened, " : "") + (ls.papers_scored != null ? ls.papers_scored + " scored" : "") + "."}));
+  nodes.push(el("h4", {cls:"mini", text:"Days since a paper touched each question"}));
+  nodes.push(el("table", {}, [el("tbody", {}, qs.map(function(q){
+    var dd = days(q.last_sweep_date), lv = dd == null ? "bad" : dd > SENTINEL_QUIET_D ? "warn" : "ok";
+    return el("tr", {title: q.gloss || ""}, [
+      el("td", {cls:"num muted", style:"width:2.6em", text:q.id}),
+      el("td", {text:q.title}),
+      el("td", {cls:"r num muted", text: q.hit_count + (q.hit_count === 1 ? " hit" : " hits")}),
+      el("td", {cls:"r"}, [pill(lv, dd == null ? "never" : dd + " d")])
+    ]);
+  }))]));
+  nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px", text:"A question with no recent hits isn't solved: it may just be hard to reach with current methods. Verdicts are judged from abstracts."}));
+  body("p-sentinel", nodes);
+  var sd = days(ls.sweep_date);
+  if (sd != null && sd > SENTINEL_STALE_D) issue("Sentinel", "warn", "No literature sweep in " + sd + " days");
+  else mark("Sentinel", "ok", m.entries_count + " papers, swept " + (sd === 0 ? "today" : sd === 1 ? "yesterday" : sd + " days ago"));
+}
+
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1251,7 +1304,8 @@ function load(){
     settle(getJSON(TTN_STATS_URL)),
     settle(getJSON(SENSOR_URL)),
     settle(getKloneUsage()),
-    settle(getJSON(CPG_URL))
+    settle(getJSON(CPG_URL)),
+    settle(getSentinel())
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1262,7 +1316,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
