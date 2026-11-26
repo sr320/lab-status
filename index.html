@@ -303,6 +303,15 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
+
+    <div>
+      <h2>Herring Copy <a href="https://sr320.github.io/project-herring-copy/" target="_blank" rel="noopener">project-herring-copy</a></h2>
+      <p class="sub">Copy number variation in Atlantic and Pacific herring from every suitable public whole-genome short-read dataset.</p>
+      <section class="panel" id="p-herring">
+        <h3>Mirror and phases <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
   </div>
 
   <h2 id="notebooks">Lab notebooks <a href="https://robertslab.info/notebooks.html" target="_blank" rel="noopener">robertslab.info/notebooks</a></h2>
@@ -347,6 +356,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
+    <a href="https://sr320.github.io/project-herring-copy/" target="_blank" rel="noopener">Herring Copy</a> dashboard, the
     <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
     <a href="https://sr320.github.io/safs-connector/" target="_blank" rel="noopener">SAFS Connector</a>, the
     <a href="https://robertslab.info/notebooks.html" target="_blank" rel="noopener">lab notebook</a> feeds, the
@@ -402,6 +412,9 @@ var ACANTHA_STALE_H = 2;
 // The Sentinel page embeds its summary as `const MODEL = {...};` (built by scripts/build_dashboard.py in sr320/framework-sentinel).
 var SENTINEL_URL = "https://sr320.github.io/framework-sentinel/";
 var SENTINEL_STALE_D = 14, SENTINEL_QUIET_D = 60;
+// Project Herring Copy rebuilds data.json (`herring build-dashboard`) on every push and every three hours.
+var HERRING_PAGE = "https://sr320.github.io/project-herring-copy/";
+var HERRING_STALE_H = 12;
 // The Things Network shares gateway status with Packet Broker's public mapper, which needs no key and allows cross-origin reads.
 // It refreshes every 4 to 12 minutes; rxRate and txRate are packets per hour (its OpenAPI text says per second, which is wrong).
 var TTN_GATEWAY_URL = "https://mapper.packetbroker.net/api/v2/gateways/netID=000013,tenantID=ttn,id=sr320-indoor-01";
@@ -1374,8 +1387,59 @@ function renderSentinel(r){
   else mark("Sentinel", "ok", m.entries_count + " papers, swept " + (sd === 0 ? "today" : sd === 1 ? "yesterday" : sd + " days ago"));
 }
 
+/* ---------- Project Herring Copy ---------- */
+function renderHerring(r){
+  if (!r.ok){ fail("p-herring", "Herring Copy data not reachable (" + r.e.message + ")."); mark("Herring", "unk", "site not reachable"); return; }
+  var d = r.v, t = d.totals, ph = d.phases, pr = d.projects;
+  if (!t || !Array.isArray(ph) || !Array.isArray(pr)){ fail("p-herring", "Herring Copy data.json loaded but its layout wasn't recognised."); mark("Herring", "unk", "data layout changed"); return; }
+  setAge("p-herring", d.generated_at, HERRING_STALE_H);
+  var n = function(x, dp){ return x == null ? "—" : Number(x).toLocaleString("en-US", {maximumFractionDigits: dp || 0, minimumFractionDigits: dp || 0}); };
+  var pct = t.gb_planned ? 100 * t.mirrored_gb / t.gb_planned : 0;
+  var sp = t.runs_by_species || {};
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("BioProjects", n(t.projects)),
+    reading("Runs", n(t.runs)),
+    reading("On gannet", n(pct, pct < 10 ? 1 : 0), "% of " + n(t.gb_planned / 1000, 1) + " TB"),
+    reading("Phases done", n(t.phases_done), "of " + ph.length)
+  ])];
+  nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:13px", text: n(sp.Atlantic) + " Atlantic and " + n(sp.Pacific) + " Pacific whole-genome Illumina runs."}));
+  nodes.push(el("h4", {cls:"mini", text: n(t.mirrored_gb, 1) + " GB mirrored · " + n(t.projects_complete) + " of " + n(t.projects) + " projects complete"}));
+  nodes.push(bar(pct, "ok"));
+  var cur = ph.filter(function(p){ return p.status === "in_progress"; });
+  if (cur.length) nodes.push(el("ul", {cls:"plain"}, cur.map(function(p){
+    return el("li", {}, [pill("warn", "Phase " + p.id), " " + p.title, p.note ? el("span", {cls:"muted", style:"font-size:13px", text:" · " + p.note}) : null]);
+  })));
+  var active = pr.filter(function(p){ return p.state !== "waiting"; });
+  if (active.length){
+    nodes.push(el("h4", {cls:"mini", text:"Projects on gannet"}));
+    nodes.push(el("div", {cls:"scroll"}, [el("table", {}, [el("tbody", {}, active.map(function(p){
+      var m = p.mirror || {}, share = p.gb_planned ? 100 * (m.gb || 0) / p.gb_planned : 0;
+      return el("tr", {title: p.note || ""}, [
+        el("td", {}, [el("a", {href: p.mirror_url || p.url, target:"_blank", rel:"noopener", text: p.accession})]),
+        el("td", {cls:"muted", text: Object.keys(p.species || {}).join(", ")}),
+        el("td", {style:"width:30%"}, [bar(share, p.state === "complete" ? "ok" : "warn")]),
+        el("td", {cls:"r num", text: n(m.gb, 1) + " GB"})
+      ]);
+    }))])]));
+  }
+  var waiting = pr.length - active.length;
+  var foot = [];
+  if (waiting) foot.push(waiting + " project" + (waiting > 1 ? "s" : "") + " waiting for the nightly mirror on raven");
+  if (d.commit) foot.push("built from " + d.commit);
+  if (foot.length) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, [foot.join("; ") + "."]));
+  var warns = [];
+  if (d.ena_available === false) warns.push("ENA could not be read for every project.");
+  if (d.mirror_available === false) warns.push("The gannet mirror could not be read.");
+  if (warns.length) nodes.push(el("p", {cls:"err", text: warns.join(" ")}));
+  body("p-herring", nodes);
+  var h = hoursSince(d.generated_at);
+  if (h != null && h > HERRING_STALE_H) issue("Herring", "warn", "Herring Copy dashboard is " + ago(d.generated_at).replace(" ago", "") + " old");
+  else if (d.mirror_available === false) issue("Herring", "warn", "Herring Copy can't read the gannet mirror");
+  else mark("Herring", "ok", n(pct, pct < 10 ? 1 : 0) + "% on gannet" + (cur.length ? ", phase " + cur.map(function(p){ return p.id; }).join("/") : ""));
+}
+
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Herring","#p-herring"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1486,7 +1550,8 @@ function load(){
     settle(getSentinel()),
     settle(getAcantha()),
     settle(getSafs()),
-    settle(getJSON(NOTEBOOKS_URL))
+    settle(getJSON(NOTEBOOKS_URL)),
+    settle(getJSON(HERRING_PAGE + "data.json"))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1497,7 +1562,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }, function(){ renderHerring(R[24]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
