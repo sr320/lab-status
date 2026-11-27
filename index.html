@@ -321,6 +321,24 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
         <div data-body><p class="muted">Loading…</p></div>
       </section>
     </div>
+
+    <div>
+      <h2>Salmon IPNV WGBS <a href="https://sr320.github.io/project-ssal-ipn/" target="_blank" rel="noopener">project-ssal-ipn</a></h2>
+      <p class="sub">DNA methylation response of Atlantic salmon to infectious pancreatic necrosis virus: 18 WGBS libraries in three groups.</p>
+      <section class="panel" id="p-ssalipn">
+        <h3>Pipeline and issues <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+
+    <div>
+      <h2>Salmon vaccine WGBS <a href="https://sr320.github.io/project-salmon-vaccine-wgbs/" target="_blank" rel="noopener">project-salmon-vaccine-wgbs</a></h2>
+      <p class="sub">DNA methylation in Atlantic salmon parr before vaccination and at 600 ATUs after.</p>
+      <section class="panel" id="p-salvax">
+        <h3>Pipeline and findings <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
   </div>
 
   <h2 id="notebooks">Lab notebooks <a href="https://robertslab.info/notebooks.html" target="_blank" rel="noopener">robertslab.info/notebooks</a></h2>
@@ -365,6 +383,8 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
+    <a href="https://sr320.github.io/project-ssal-ipn/" target="_blank" rel="noopener">salmon IPNV</a> and
+    <a href="https://sr320.github.io/project-salmon-vaccine-wgbs/" target="_blank" rel="noopener">salmon vaccine</a> WGBS dashboards, the
     <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREC</a> home page, the
     <a href="https://sr320.github.io/project-herring-copy/" target="_blank" rel="noopener">Herring Copy</a> dashboard, the
     <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
@@ -424,6 +444,12 @@ var SENTINEL_URL = "https://sr320.github.io/framework-sentinel/";
 var SENTINEL_STALE_D = 14, SENTINEL_QUIET_D = 60;
 // AREC (sr320/AREE-co) publishes no JSON, so the panel reads the counts and progress table off its Quarto home page, rebuilt on every push.
 var AREC_PAGE = "https://sr320.github.io/AREE-co/";
+// The two salmon WGBS dashboards share a template whose hand-edited `const DATA = {...}` is JavaScript, not JSON:
+// the IPNV site keeps it in data.js, the vaccine site inline in index.html. It is evaluated in a sandboxed iframe.
+var WGBS = [
+  {id:"p-ssalipn", sys:"IPNV", page:"https://sr320.github.io/project-ssal-ipn/"},
+  {id:"p-salvax", sys:"Vaccine", page:"https://sr320.github.io/project-salmon-vaccine-wgbs/"}
+];
 // Project Herring Copy rebuilds data.json (`herring build-dashboard`) on every push and every three hours.
 var HERRING_PAGE = "https://sr320.github.io/project-herring-copy/";
 var HERRING_STALE_H = 12;
@@ -982,6 +1008,80 @@ function renderAREE(r){
   mark("AREE", "ok", tot ? done + "/" + tot + " harmonized" : "site up");
 }
 
+/* ---------- salmon WGBS dashboards ---------- */
+// Runs `code` in an iframe with an opaque origin (no access to this page, its storage or cookies) and returns what it passes to __out().
+function sandboxEval(code){
+  return new Promise(function(resolve, reject){
+    var f = document.createElement("iframe"), tm;
+    f.setAttribute("sandbox", "allow-scripts"); f.style.display = "none";
+    function done(){ clearTimeout(tm); window.removeEventListener("message", on); f.remove(); }
+    function on(e){ if (e.source !== f.contentWindow) return; done(); if (e.data && e.data.ok) resolve(e.data.v); else reject(new Error((e.data && e.data.err) || "sandbox failed")); }
+    window.addEventListener("message", on);
+    tm = setTimeout(function(){ done(); reject(new Error("timed out reading DATA")); }, 10000);
+    f.srcdoc = "<script>function __out(v){ parent.postMessage({ok:true, v:JSON.parse(JSON.stringify(v))}, \"*\"); }\ntry{\n" +
+      code.replace(/<\/script/gi, "<\\/script") + "\n}catch(e){ parent.postMessage({ok:false, err:String(e)}, \"*\"); }<\/script>";
+    document.body.appendChild(f);
+  });
+}
+function getText(url){ return fetch(url + (url.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }); }
+function getWgbs(page){
+  return getText(page).then(function(t){
+    if (/<script[^>]+src=["']data\.js["']/.test(t)) return getText(page + "data.js");
+    var i = t.indexOf("const DATA"); if (i < 0) throw new Error("no DATA block on the page");
+    var m = /\n\};?[ \t]*\r?\n/.exec(t.slice(i)); if (!m) throw new Error("DATA block not closed");
+    return t.slice(i, i + m.index + m[0].length);
+  }).then(function(code){ return sandboxEval(code + "\n;__out(DATA);"); });
+}
+function plain(h){ var d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<[^>]*>/g, ""); return d.textContent; }
+function wgbsTime(s){
+  var m = /^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}:\d{2})\s*(PST|PDT)?/.exec(String(s || ""));
+  if (!m) return null;
+  var hm = m[2].length === 4 ? "0" + m[2] : m[2];
+  return m[1] + "T" + hm + ":00" + (m[3] === "PDT" ? "-07:00" : "-08:00");
+}
+function renderWgbs(cfg, r){
+  var id = cfg.id;
+  if (!r.ok){ fail(id, "Dashboard data not reachable (" + r.e.message + ")."); mark(cfg.sys, "unk", "site not reachable"); return; }
+  var d = r.v, steps = d.steps || [], fs = d.findings || [];
+  if (!steps.length){ fail(id, "DATA loaded but has no pipeline steps."); mark(cfg.sys, "unk", "data layout changed"); return; }
+  var iso = wgbsTime(d.updated);
+  setAge(id, iso, null);
+  var done = steps.filter(function(x){ return x.status === "done"; }).length;
+  var serious = fs.filter(function(f){ return f.level === "serious"; }), warnings = fs.filter(function(f){ return f.level === "warning"; });
+  var blocked = steps.filter(function(x){ return x.status === "blocked"; });
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("Steps done", String(done), "of " + steps.length),
+    d.samples && d.samples.length ? reading("Libraries", String(d.samples.length)) : null,
+    reading("Serious", String(serious.length)),
+    reading("Warnings", String(warnings.length))
+  ])];
+  nodes.push(bar(done / steps.length * 100, "ok"));
+  var note = String(d.updated || "").replace(/^[^,]*,\s*/, "");
+  if (note && note !== d.updated) nodes.push(el("p", {style:"margin:6px 0 0;font-size:13px", text: note.charAt(0).toUpperCase() + note.slice(1) + "."}));
+  var live = steps.filter(function(x){ return x.status !== "done" && x.status !== "planned"; });
+  if (live.length){
+    nodes.push(el("h4", {cls:"mini", text:"Now and next"}));
+    nodes.push(el("ul", {cls:"plain"}, live.map(function(x){
+      var lv = x.status === "running" ? "ok" : x.status === "blocked" ? "bad" : "warn";
+      return el("li", {title: plain(x.detail)}, [pill(lv, x.status), " " + plain(x.title), x.when ? el("span", {cls:"muted", style:"font-size:13px", text:" · " + plain(x.when)}) : null]);
+    })));
+  }
+  var open = serious.concat(warnings);
+  if (open.length){
+    nodes.push(el("h4", {cls:"mini", text:"Open issues"}));
+    nodes.push(el("ul", {cls:"plain"}, open.map(function(f){
+      return el("li", {title: plain(f.body) + (f.action ? "\n\n" + plain(f.action) : "")}, [pill(f.level === "serious" ? "bad" : "warn", plain(f.tag) || f.level), " " + plain(f.title)]);
+    })));
+  }
+  body(id, nodes);
+  if (blocked.length) issue(cfg.sys, "warn", cfg.sys + ": blocked at " + plain(blocked[0].title));
+  else if (serious.length) issue(cfg.sys, "warn", cfg.sys + ": " + plain(serious[0].title) + (serious.length > 1 ? " (+" + (serious.length - 1) + " more serious)" : ""));
+  else {
+    var run = steps.filter(function(x){ return x.status === "running"; })[0];
+    mark(cfg.sys, "ok", done + "/" + steps.length + " steps" + (run ? ", " + plain(run.title) + " running" : ""));
+  }
+}
+
 /* ---------- AREC (AREE-co) ---------- */
 function getArec(){
   return fetch(AREC_PAGE + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(t){
@@ -1498,7 +1598,7 @@ function renderHerring(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["AREC","#p-arec"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Herring","#p-herring"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["AREC","#p-arec"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Herring","#p-herring"],["IPNV","#p-ssalipn"],["Vaccine","#p-salvax"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1611,7 +1711,9 @@ function load(){
     settle(getSafs()),
     settle(getJSON(NOTEBOOKS_URL)),
     settle(getJSON(HERRING_PAGE + "data.json")),
-    settle(getArec())
+    settle(getArec()),
+    settle(getWgbs(WGBS[0].page)),
+    settle(getWgbs(WGBS[1].page))
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1622,7 +1724,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }, function(){ renderHerring(R[24]); }, function(){ renderArec(R[25]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }, function(){ renderHerring(R[24]); }, function(){ renderArec(R[25]); }, function(){ renderWgbs(WGBS[0], R[26]); }, function(){ renderWgbs(WGBS[1], R[27]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
