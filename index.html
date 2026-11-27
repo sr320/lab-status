@@ -260,6 +260,15 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     </div>
 
     <div>
+      <h2>AREC <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREE-co</a></h2>
+      <p class="sub">Aquaculture Resilience Evidence Companion: public Pacific oyster gene-expression experiments reanalysed into a common format, with each study's context and limits.</p>
+      <section class="panel" id="p-arec">
+        <h3>Results to date <span class="age" data-age></span></h3>
+        <div data-body><p class="muted">Loading…</p></div>
+      </section>
+    </div>
+
+    <div>
       <h2>White Whale <a href="https://robertslab.github.io/project-white-whale/" target="_blank" rel="noopener">project-white-whale</a></h2>
       <p class="sub">Every public Pacific oyster methylome, reprocessed from raw reads on one reference genome.</p>
       <section class="panel" id="p-whale">
@@ -356,6 +365,7 @@ footer{margin-top:20px;color:var(--muted);font-size:12px}
     <a href="https://sr320.github.io/conditioning-atlas/" target="_blank" rel="noopener">Conditioning Atlas</a>, the
     <a href="https://sr320.github.io/project-cpg-me/" target="_blank" rel="noopener">CpG O/E Atlas</a>, the
     <a href="https://sr320.github.io/framework-sentinel/" target="_blank" rel="noopener">Framework Sentinel</a>, the
+    <a href="https://sr320.github.io/AREE-co/" target="_blank" rel="noopener">AREC</a> home page, the
     <a href="https://sr320.github.io/project-herring-copy/" target="_blank" rel="noopener">Herring Copy</a> dashboard, the
     <a href="https://robertslab.github.io/acantha/" target="_blank" rel="noopener">Acantha</a> site, the
     <a href="https://sr320.github.io/safs-connector/" target="_blank" rel="noopener">SAFS Connector</a>, the
@@ -412,6 +422,8 @@ var ACANTHA_STALE_H = 2;
 // The Sentinel page embeds its summary as `const MODEL = {...};` (built by scripts/build_dashboard.py in sr320/framework-sentinel).
 var SENTINEL_URL = "https://sr320.github.io/framework-sentinel/";
 var SENTINEL_STALE_D = 14, SENTINEL_QUIET_D = 60;
+// AREC (sr320/AREE-co) publishes no JSON, so the panel reads the counts and progress table off its Quarto home page, rebuilt on every push.
+var AREC_PAGE = "https://sr320.github.io/AREE-co/";
 // Project Herring Copy rebuilds data.json (`herring build-dashboard`) on every push and every three hours.
 var HERRING_PAGE = "https://sr320.github.io/project-herring-copy/";
 var HERRING_STALE_H = 12;
@@ -970,6 +982,53 @@ function renderAREE(r){
   mark("AREE", "ok", tot ? done + "/" + tot + " harmonized" : "site up");
 }
 
+/* ---------- AREC (AREE-co) ---------- */
+function getArec(){
+  return fetch(AREC_PAGE + "?t=" + Date.now(), {cache:"no-store"}).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(function(t){
+    var doc = new DOMParser().parseFromString(t, "text/html"), stats = {};
+    doc.querySelectorAll(".stats .stat").forEach(function(s){
+      var v = s.querySelector(".stat-value"), k = s.querySelector(".stat-label");
+      if (v && k) stats[k.textContent.trim()] = Number(v.textContent.replace(/[^0-9.]/g, ""));
+    });
+    var rows = [].map.call(doc.querySelectorAll("#real-study-progress table tbody tr"), function(tr){
+      var c = tr.querySelectorAll("td"); return {study: c[0] && c[0].textContent.trim(), project: c[1] && c[1].textContent.trim(), status: c[3] ? c[3].textContent.trim() : ""};
+    });
+    var upd = [].filter.call(doc.querySelectorAll("p"), function(p){ return /^Last updated from commit/.test(p.textContent.trim()); })[0], commit = null, built = null;
+    if (upd){
+      var a = upd.querySelector("a"); if (a) commit = {short: a.textContent.trim(), url: a.href};
+      var m = /site built (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC/.exec(upd.textContent); if (m) built = m[1] + "T" + m[2] + ":00Z";
+    }
+    return {stats: stats, rows: rows, commit: commit, built: built};
+  });
+}
+function renderArec(r){
+  if (!r.ok){ fail("p-arec", "AREC site not reachable (" + r.e.message + ")."); mark("AREC", "unk", "site not reachable"); return; }
+  var d = r.v, st = d.stats;
+  if (!Object.keys(st).length){ fail("p-arec", "AREC home page loaded but its counts weren't found."); mark("AREC", "unk", "page layout changed"); return; }
+  setAge("p-arec", d.built, null);
+  var n = function(x){ return x == null || isNaN(x) ? "—" : x.toLocaleString("en-US"); };
+  var nodes = [el("div", {cls:"readings"}, [
+    reading("BioProjects", n(st["Real public BioProjects"])),
+    reading("Contrasts", n(st["Registered real-study contrasts"])),
+    reading("Evidence records", n(st["Real harmonized evidence records"])),
+    reading("Evidence cards", n(st["Real evidence cards"]))
+  ])];
+  var tot = st["Registered real-study contrasts"], done = st["Contrasts with harmonized evidence"];
+  if (tot && done != null){
+    nodes.push(el("h4", {cls:"mini", text: done + " of " + tot + " contrasts harmonized · " + n(st["BioProjects reanalysed"]) + " of " + n(st["Real public BioProjects"]) + " BioProjects reanalysed"}));
+    nodes.push(bar(done / tot * 100, "ok"));
+  }
+  var pending = d.rows.filter(function(x){ return /not harmonized/.test(x.status); });
+  var flagged = d.rows.filter(function(x){ return /exploratory/.test(x.status); });
+  if (pending.length) nodes.push(el("p", {style:"margin:6px 0 0;font-size:13px"}, [pill("warn", pending.length + (pending.length === 1 ? " contrast" : " contrasts") + " not yet harmonized"), el("span", {cls:"muted", text:" " + pending.map(function(x){ return x.project; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).join(", ")})]));
+  if (flagged.length) nodes.push(el("p", {cls:"muted", style:"margin:4px 0 0;font-size:13px", text: flagged.length + " exploratory: " + flagged.map(function(x){ return x.project; }).join(", ") + "."}));
+  if (d.commit) nodes.push(el("p", {cls:"muted", style:"margin:8px 0 0;font-size:13px"}, [
+    "Built from commit ", el("a", {href: d.commit.url, target:"_blank", rel:"noopener", text: d.commit.short}), d.built ? " (" + ago(d.built) + ")." : "."
+  ]));
+  body("p-arec", nodes);
+  mark("AREC", "ok", tot ? done + "/" + tot + " harmonized" : "site up");
+}
+
 /* ---------- GitHub ---------- */
 function renderGitHub(r){
   if (!r.ok){ fail("p-ghrepos", "No GitHub activity summary yet (" + r.e.message + ")."); fail("p-ghrecent", "No GitHub activity summary yet."); return; }
@@ -1439,7 +1498,7 @@ function renderHerring(r){
 }
 
 /* ---------- summary ---------- */
-var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Herring","#p-herring"],["Claude","#claude"]];
+var STRIP = [["In lab","#p-inlab"],["Gateway","#p-ttn"],["Sensor","#p-sensor"],["Seneye","#p-seneye"],["Tankcam","#p-cam"],["Water quality","#p-wq"],["Thorndyke","#p-acantha"],["raven","#p-ravenlive"],["gannet","#p-hosts"],["klone","#p-klone"],["AREE","#p-aree"],["AREC","#p-arec"],["White Whale","#p-whale"],["Atlas","#p-atlas"],["CpG O/E","#p-cpg"],["SAFS","#p-safs"],["Notebooks","#p-notebooks"],["Sentinel","#p-sentinel"],["Herring","#p-herring"],["Claude","#claude"]];
 function paintSummary(){
   var strip = $("#strip");
   strip.replaceChildren.apply(strip, STRIP.map(function(s){
@@ -1551,7 +1610,8 @@ function load(){
     settle(getAcantha()),
     settle(getSafs()),
     settle(getJSON(NOTEBOOKS_URL)),
-    settle(getJSON(HERRING_PAGE + "data.json"))
+    settle(getJSON(HERRING_PAGE + "data.json")),
+    settle(getArec())
   ].concat(minWait)).then(function(R){
     var ext = R[0], int = R[1];
     var jobs = [
@@ -1562,7 +1622,7 @@ function load(){
       function(){ renderClaudeStatus(R[9]); }, function(){ renderClaudeActivity(R[10]); }, function(){ renderWhale(R[11]); },
       function(){ renderGitHub(R[12]); }, function(){ renderAtlas(R[13], R[14]); },
       function(){ renderTTN(R[15], R[16]); }, function(){ renderSensor(R[17]); }, function(){ renderKloneUsers(R[18]); },
-      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }, function(){ renderHerring(R[24]); }
+      function(){ renderCpG(R[19]); }, function(){ renderSentinel(R[20]); }, function(){ renderAcantha(R[21]); }, function(){ renderSafs(R[22]); }, function(){ renderNotebooks(R[23]); }, function(){ renderHerring(R[24]); }, function(){ renderArec(R[25]); }
     ];
     jobs.forEach(function(j){ try { j(); } catch (e){ console.error(e); } });
     paintSummary();
