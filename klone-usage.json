@@ -1,0 +1,520 @@
+{
+ "generated": "2026-11-28T13:07:29Z",
+ "accounts": [
+  "srlab",
+  "coenv"
+ ],
+ "window_days": 7,
+ "users": [
+  {
+   "user": "sr320",
+   "lab": true,
+   "now": {
+    "running": 25,
+    "pending": 10,
+    "cpus": 205,
+    "mem_gb": 513.0,
+    "pending_cpus": 76,
+    "partitions": {
+     "compute-coenv/compute": 34,
+     "cpu-g2-coenv/cpu-g2": 2,
+     "ckpt-srlab/ckpt-all": 168,
+     "ckpt-srlab/ckpt": 1
+    },
+    "groups": {
+     "coenv": 36,
+     "ckpt": 169
+    },
+    "pending_reasons": {
+     "AssocGrpCpuLimit": 4,
+     "BeginTime": 1
+    }
+   },
+   "window": {
+    "cpu_hours": 30156.7,
+    "ckpt_cpu_hours": 23864.2,
+    "groups": {
+     "coenv": 4096.0,
+     "srlab": 2196.4,
+     "ckpt": 23864.2
+    },
+    "jobs": 4332,
+    "completed": 3621,
+    "problems": {
+     "FAILED": 637,
+     "CANCELLED": 65,
+     "TIMEOUT": 2,
+     "PREEMPTED": 6
+    }
+   }
+  },
+  {
+   "user": "other coenv",
+   "lab": false,
+   "now": {
+    "running": 1,
+    "pending": 2,
+    "cpus": 160,
+    "mem_gb": 640.0,
+    "pending_cpus": 250,
+    "partitions": {
+     "cpu-g2-coenv/cpu-g2": 160
+    },
+    "groups": {
+     "coenv": 160
+    },
+    "pending_reasons": {
+     "user env retrieval failed requeued held": 2
+    }
+   },
+   "window": {
+    "cpu_hours": 35827.5,
+    "ckpt_cpu_hours": 0.0,
+    "groups": {
+     "coenv": 35827.5
+    },
+    "jobs": 7050,
+    "completed": 6873,
+    "problems": {
+     "TIMEOUT": 14,
+     "FAILED": 163
+    }
+   }
+  }
+ ],
+ "days": [
+  {
+   "date": "2026-11-22",
+   "own": 806.4,
+   "ckpt": 408.3,
+   "groups": {
+    "coenv": 738.7,
+    "srlab": 67.7,
+    "ckpt": 408.3
+   }
+  },
+  {
+   "date": "2026-11-23",
+   "own": 104.2,
+   "ckpt": 944.7,
+   "groups": {
+    "coenv": 84.6,
+    "srlab": 19.6,
+    "ckpt": 944.7
+   }
+  },
+  {
+   "date": "2026-11-24",
+   "own": 1408.2,
+   "ckpt": 6608.3,
+   "groups": {
+    "coenv": 640.6,
+    "srlab": 767.6,
+    "ckpt": 6608.3
+   }
+  },
+  {
+   "date": "2026-11-25",
+   "own": 1305.1,
+   "ckpt": 3999.8,
+   "groups": {
+    "coenv": 774.0,
+    "srlab": 531.1,
+    "ckpt": 3999.8
+   }
+  },
+  {
+   "date": "2026-11-26",
+   "own": 1085.9,
+   "ckpt": 273.8,
+   "groups": {
+    "coenv": 818.4,
+    "srlab": 267.5,
+    "ckpt": 273.8
+   }
+  },
+  {
+   "date": "2026-11-27",
+   "own": 1330.0,
+   "ckpt": 8133.2,
+   "groups": {
+    "coenv": 855.5,
+    "srlab": 474.4,
+    "ckpt": 8133.2
+   }
+  },
+  {
+   "date": "2026-11-28",
+   "own": 252.7,
+   "ckpt": 3496.2,
+   "groups": {
+    "coenv": 184.2,
+    "srlab": 68.5,
+    "ckpt": 3496.2
+   }
+  }
+ ],
+ "jobs": [
+  {
+   "id": "43527919",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "whale-head-FALLET2022",
+   "state": "RUNNING",
+   "elapsed_s": 260119,
+   "cpus": 2,
+   "nodes": "n3012",
+   "reason": null
+  },
+  {
+   "id": "43576641",
+   "user": "sr320",
+   "partition": "cpu-g2",
+   "group": "coenv",
+   "name": "aree-VALDIVIESO2025_POM\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 87992,
+   "cpus": 2,
+   "nodes": "n3433",
+   "reason": null
+  },
+  {
+   "id": "43571987",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 21749,
+   "cpus": 16,
+   "nodes": "n3048",
+   "reason": null
+  },
+  {
+   "id": "43577242",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 11267,
+   "cpus": 16,
+   "nodes": "n3309",
+   "reason": null
+  },
+  {
+   "id": "43588358",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 10298,
+   "cpus": 8,
+   "nodes": "n3032",
+   "reason": null
+  },
+  {
+   "id": "43588512",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 9212,
+   "cpus": 8,
+   "nodes": "n3431",
+   "reason": null
+  },
+  {
+   "id": "43588584",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 8669,
+   "cpus": 8,
+   "nodes": "n3395",
+   "reason": null
+  },
+  {
+   "id": "43588593",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 8669,
+   "cpus": 8,
+   "nodes": "n3395",
+   "reason": null
+  },
+  {
+   "id": "43588595",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 8669,
+   "cpus": 8,
+   "nodes": "n3395",
+   "reason": null
+  },
+  {
+   "id": "43588600",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 8388,
+   "cpus": 8,
+   "nodes": "n3413",
+   "reason": null
+  },
+  {
+   "id": "43588601",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 8388,
+   "cpus": 8,
+   "nodes": "n3413",
+   "reason": null
+  },
+  {
+   "id": "43588676",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 7981,
+   "cpus": 8,
+   "nodes": "n3033",
+   "reason": null
+  },
+  {
+   "id": "43588677",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 7981,
+   "cpus": 8,
+   "nodes": "n3338",
+   "reason": null
+  },
+  {
+   "id": "43588716",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 7715,
+   "cpus": 8,
+   "nodes": "n3046",
+   "reason": null
+  },
+  {
+   "id": "43588764",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 7313,
+   "cpus": 8,
+   "nodes": "n3045",
+   "reason": null
+  },
+  {
+   "id": "43588792",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 7179,
+   "cpus": 8,
+   "nodes": "n3040",
+   "reason": null
+  },
+  {
+   "id": "43588818",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 6914,
+   "cpus": 8,
+   "nodes": "n3035",
+   "reason": null
+  },
+  {
+   "id": "43588865",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 6498,
+   "cpus": 8,
+   "nodes": "n3412",
+   "reason": null
+  },
+  {
+   "id": "43588898",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 6364,
+   "cpus": 8,
+   "nodes": "n3026",
+   "reason": null
+  },
+  {
+   "id": "43588952",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 5947,
+   "cpus": 8,
+   "nodes": "n3043",
+   "reason": null
+  },
+  {
+   "id": "43588956",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 5947,
+   "cpus": 8,
+   "nodes": "n3248",
+   "reason": null
+  },
+  {
+   "id": "43589010",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 5422,
+   "cpus": 8,
+   "nodes": "n3046",
+   "reason": null
+  },
+  {
+   "id": "43589123",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 4646,
+   "cpus": 8,
+   "nodes": "n3251",
+   "reason": null
+  },
+  {
+   "id": "43589608",
+   "user": "sr320",
+   "partition": "ckpt-all",
+   "group": "ckpt",
+   "name": "nf-BISMARK_METHYLATION_\u2026",
+   "state": "RUNNING",
+   "elapsed_s": 1993,
+   "cpus": 16,
+   "nodes": "n3136",
+   "reason": null
+  },
+  {
+   "id": "43518564",
+   "user": "sr320",
+   "partition": "ckpt",
+   "group": "ckpt",
+   "name": "klone_usage.sh",
+   "state": "RUNNING",
+   "elapsed_s": 9,
+   "cpus": 1,
+   "nodes": "n3015",
+   "reason": null
+  },
+  {
+   "id": "43518563",
+   "user": "sr320",
+   "partition": "ckpt",
+   "group": "ckpt",
+   "name": "hyakalloc_snapshot.sh",
+   "state": "PENDING",
+   "elapsed_s": null,
+   "cpus": 1,
+   "nodes": null,
+   "reason": "BeginTime"
+  },
+  {
+   "id": "43578834",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "PENDING",
+   "elapsed_s": null,
+   "cpus": 16,
+   "nodes": null,
+   "reason": "AssocGrpCpuLimit"
+  },
+  {
+   "id": "43583641",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "PENDING",
+   "elapsed_s": null,
+   "cpus": 16,
+   "nodes": null,
+   "reason": "AssocGrpCpuLimit"
+  },
+  {
+   "id": "43586240",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "PENDING",
+   "elapsed_s": null,
+   "cpus": 16,
+   "nodes": null,
+   "reason": "AssocGrpCpuLimit"
+  },
+  {
+   "id": "43587325",
+   "user": "sr320",
+   "partition": "compute",
+   "group": "coenv",
+   "name": "nf-BISMARK_ALIGN_(SRR11\u2026",
+   "state": "PENDING",
+   "elapsed_s": null,
+   "cpus": 16,
+   "nodes": null,
+   "reason": "AssocGrpCpuLimit"
+  }
+ ],
+ "jobs_total": 30
+}
