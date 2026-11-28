@@ -1,0 +1,188 @@
+{
+ "updated_at": "2026-11-28T13:18:32+00:00",
+ "days": 30,
+ "scopes": [
+  "org:RobertsLab",
+  "user:sr320"
+ ],
+ "total": 251,
+ "daily": [
+  [
+   "2026-10-30",
+   0
+  ],
+  [
+   "2026-10-31",
+   17
+  ],
+  [
+   "2026-11-01",
+   3
+  ],
+  [
+   "2026-11-02",
+   5
+  ],
+  [
+   "2026-11-03",
+   1
+  ],
+  [
+   "2026-11-04",
+   8
+  ],
+  [
+   "2026-11-05",
+   0
+  ],
+  [
+   "2026-11-06",
+   0
+  ],
+  [
+   "2026-11-07",
+   0
+  ],
+  [
+   "2026-11-08",
+   0
+  ],
+  [
+   "2026-11-09",
+   5
+  ],
+  [
+   "2026-11-10",
+   0
+  ],
+  [
+   "2026-11-11",
+   0
+  ],
+  [
+   "2026-11-12",
+   0
+  ],
+  [
+   "2026-11-13",
+   0
+  ],
+  [
+   "2026-11-14",
+   1
+  ],
+  [
+   "2026-11-15",
+   0
+  ],
+  [
+   "2026-11-16",
+   2
+  ],
+  [
+   "2026-11-17",
+   1
+  ],
+  [
+   "2026-11-18",
+   6
+  ],
+  [
+   "2026-11-19",
+   24
+  ],
+  [
+   "2026-11-20",
+   10
+  ],
+  [
+   "2026-11-21",
+   13
+  ],
+  [
+   "2026-11-22",
+   3
+  ],
+  [
+   "2026-11-23",
+   37
+  ],
+  [
+   "2026-11-24",
+   21
+  ],
+  [
+   "2026-11-25",
+   34
+  ],
+  [
+   "2026-11-26",
+   20
+  ],
+  [
+   "2026-11-27",
+   37
+  ],
+  [
+   "2026-11-28",
+   1
+  ]
+ ],
+ "people": [
+  {
+   "name": "Steven",
+   "commits": 233,
+   "commits_7d": 153,
+   "top_repo": "RobertsLab/project-white-whale",
+   "repos": 19
+  },
+  {
+   "name": "Claude (cloud)",
+   "commits": 14,
+   "commits_7d": 0,
+   "top_repo": "RobertsLab/lab-website",
+   "repos": 3
+  },
+  {
+   "name": "Sam",
+   "commits": 4,
+   "commits_7d": 0,
+   "top_repo": "RobertsLab/code",
+   "repos": 1
+  }
+ ],
+ "repos": [
+  {
+   "repo": "RobertsLab/project-white-whale",
+   "commits": 41
+  },
+  {
+   "repo": "sr320/project-cpg-me",
+   "commits": 31
+  },
+  {
+   "repo": "sr320/project-ssal-ipn",
+   "commits": 21
+  },
+  {
+   "repo": "sr320/project-salmon-vaccine-wgbs",
+   "commits": 18
+  },
+  {
+   "repo": "sr320/workflow-stdm",
+   "commits": 18
+  },
+  {
+   "repo": "sr320/AREE",
+   "commits": 17
+  },
+  {
+   "repo": "sr320/lab-status",
+   "commits": 17
+  },
+  {
+   "repo": "RobertsLab/lab-website",
+   "commits": 16
+  }
+ ]
+}

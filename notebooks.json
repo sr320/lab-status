@@ -1,0 +1,150 @@
+{
+ "updated_at": "2026-11-28T13:18:37+00:00",
+ "source": "https://robertslab.info/notebooks.html",
+ "notebooks": [
+  {
+   "name": "Hazel Abrahamson",
+   "url": "https://genefish.wordpress.com/author/hnote22/",
+   "last_post": "2026-11-26T05:41:40+00:00",
+   "title": "11.25: second exposure in sublethal/lethal experiment",
+   "post_url": "https://genefish.wordpress.com/2026/11/25/11-25-second-exposure-in-sublethal-lethal-experiment/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Jesse Lowe",
+   "url": "https://genefish.wordpress.com/author/jlowe50bd14a0c15/",
+   "last_post": "2026-11-26T03:15:02+00:00",
+   "title": "Tank room, SHORE room and water chemistry trials",
+   "post_url": "https://genefish.wordpress.com/2026/11/25/tank-room-shore-room-and-water-chemistry-trials-4/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Steven Roberts",
+   "url": "https://sr320.github.io/tumbling-oysters/",
+   "last_post": "2026-11-25T08:00:00+00:00",
+   "title": "Co-folding the Sea Louse Secretome Against the Salmon Skin Interface",
+   "post_url": "https://sr320.github.io/tumbling-oysters/posts/99-caligus-salmon-ppi/",
+   "via": "feed"
+  },
+  {
+   "name": "Cas Daniel",
+   "url": "https://genefish.wordpress.com/author/ckdan19/",
+   "last_post": "2026-11-24T19:00:17+00:00",
+   "title": "TWIF S10E01 (Espa\u00f1ol) \u2013 La regla chueca por un factor de diez",
+   "post_url": "https://genefish.wordpress.com/2026/11/24/twif-s10e01-espanol-la-regla-chueca-por-un-factor-de-diez/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Jake Balzer",
+   "url": "https://genefish.wordpress.com/author/jbalzer5/",
+   "last_post": "2026-11-21T02:18:37+00:00",
+   "title": "Broodstock Resazurin Assay",
+   "post_url": "https://genefish.wordpress.com/2026/11/20/broodstock-resazurin-assay/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Samuel Slutz",
+   "url": "https://genefish.wordpress.com/author/samuelos1e4f4cd96e/",
+   "last_post": "2026-11-20T02:08:24+00:00",
+   "title": "Water Quality Testing & Adjustment, Feeding Regimen Adjustment for Aquilonastras + Quick Transcriptomic Update",
+   "post_url": "https://genefish.wordpress.com/2026/11/19/water-quality-testing-adjustment-feeding-regimen-adjustment-for-aquilonastras-quick-transcriptomic-update/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Grace Crandall",
+   "url": "https://grace-ac.github.io/notebook/",
+   "last_post": "2026-11-17T08:00:00+00:00",
+   "title": "FHL 2026 - New Standard Curve Plate Run and Comparing to Previous Curve",
+   "post_url": "https://grace-ac.github.io/comparing-std-curves/",
+   "via": "feed"
+  },
+  {
+   "name": "Christina Zhang",
+   "url": "https://genefish.wordpress.com/author/qingrz2/",
+   "last_post": "2026-11-11T21:45:29+00:00",
+   "title": "Guava Muse: system check and preliminary testing",
+   "post_url": "https://genefish.wordpress.com/2026/11/11/guava-muse-system-check-and-preliminary-testing/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Megan Ewing",
+   "url": "https://meganewing.github.io/mewing-notebook/",
+   "last_post": "2026-11-10T19:47:02+00:00",
+   "title": null,
+   "post_url": null,
+   "via": "commit"
+  },
+  {
+   "name": "Ariana Huffmyer",
+   "url": "https://ahuffmyer.github.io/notebook.html",
+   "last_post": "2026-11-10T00:00:00+00:00",
+   "title": "10K hardening project growth and survival analysis",
+   "post_url": "https://ahuffmyer.github.io/posts/2026-11-10-10K-experiment-growth-survival-analysis.html",
+   "via": "feed"
+  },
+  {
+   "name": "GG Foster",
+   "url": "https://genefish.wordpress.com/author/giselff250455090/",
+   "last_post": "2026-11-09T20:35:29+00:00",
+   "title": "Coding for the resazurin assay",
+   "post_url": "https://genefish.wordpress.com/2026/11/09/coding-for-the-resazurin-assay/",
+   "via": "wordpress"
+  },
+  {
+   "name": "Sam White",
+   "url": "https://robertslab.github.io/sams-notebook/",
+   "last_post": "2026-11-04T08:00:00+00:00",
+   "title": "Temperature Monitoring - ESP32 Tank Temperature Hub and Gannet Receiver",
+   "post_url": "https://robertslab.github.io/sams-notebook/posts/2026/2026-11-04-Temperature-Monitoring---ESP32-Tank-Temperature-Hub-and-Gannet-Receiver/",
+   "via": "feed"
+  },
+  {
+   "name": "Zach Bengtsson",
+   "url": "https://zbengt.github.io/notebook/",
+   "last_post": "2026-05-06T07:00:00+00:00",
+   "title": "CEABiGR lncRNA-mRNA correlation clusters summarized",
+   "post_url": "https://zbengt.github.io/2026-05-06-CEABiGR-lncRNA-mRNA-correlations-summary-table-099/",
+   "via": "feed"
+  },
+  {
+   "name": "Chris Mantegna",
+   "url": "https://chrismantegna.github.io/labnotebook/weeklyupdates.html",
+   "last_post": "2026-04-25T07:00:00+00:00",
+   "title": "National DNA Day",
+   "post_url": "https://chrismantegna.github.io/labnotebook/weekly/2026_0425/",
+   "via": "feed"
+  },
+  {
+   "name": "Celeste Valdivia",
+   "url": "https://valeste.github.io/tough-tunicates/",
+   "last_post": "2025-11-10T19:39:40+00:00",
+   "title": null,
+   "post_url": null,
+   "via": "commit"
+  },
+  {
+   "name": "Maddy Bernstein",
+   "url": "https://genefish.wordpress.com/author/maddyab/",
+   "last_post": null,
+   "title": null,
+   "post_url": null,
+   "via": null
+  },
+  {
+   "name": "Sophie Lord",
+   "url": "https://genefish.wordpress.com/author/soplo27/",
+   "last_post": null,
+   "title": null,
+   "post_url": null,
+   "via": null
+  },
+  {
+   "name": "Beyer Roberts",
+   "url": "https://genefish.wordpress.com/author/robertsblr/",
+   "last_post": null,
+   "title": null,
+   "post_url": null,
+   "via": null
+  }
+ ]
+}

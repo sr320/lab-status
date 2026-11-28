@@ -1,0 +1,124 @@
+{
+ "updated_at": "2026-11-28T13:18:32+00:00",
+ "org": "RobertsLab",
+ "days": 7,
+ "total": 36,
+ "people": [
+  "Steven"
+ ],
+ "repos": [
+  {
+   "repo": "lab-website",
+   "url": "https://github.com/RobertsLab/lab-website",
+   "commits": 2,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-25T16:37:54Z"
+  },
+  {
+   "repo": "acantha",
+   "url": "https://github.com/RobertsLab/acantha",
+   "commits": 1,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-25T15:32:09Z"
+  },
+  {
+   "repo": "project-white-whale",
+   "url": "https://github.com/RobertsLab/project-white-whale",
+   "commits": 33,
+   "people": [
+    "Steven"
+   ],
+   "last_at": "2026-11-25T13:28:51Z"
+  }
+ ],
+ "recent": [
+  {
+   "repo": "lab-website",
+   "who": "Steven",
+   "at": "2026-11-25T16:37:54Z",
+   "msg": "Include Kathleen Durkin's per-project feeds on Lab Notebooks page",
+   "url": "https://github.com/RobertsLab/lab-website/commit/8a253b2795e63dd018114d68bd26569a4939daa2"
+  },
+  {
+   "repo": "lab-website",
+   "who": "Steven",
+   "at": "2026-11-25T16:32:06Z",
+   "msg": "Update Lab Notebooks page roster and feeds",
+   "url": "https://github.com/RobertsLab/lab-website/commit/a6ca310598762936d02db7284df451f2ae81a770"
+  },
+  {
+   "repo": "acantha",
+   "who": "Steven",
+   "at": "2026-11-25T15:32:09Z",
+   "msg": "Add a farm mortality log filed through a GitHub issue form",
+   "url": "https://github.com/RobertsLab/acantha/commit/5f70c7535234d218c6f076650d571925632c990a"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T13:28:51Z",
+   "msg": "Docs: fix errors found in an audit against the code, configs and data",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/05d3f6b464f4429b9711db0242de869cd6252039"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T13:20:56Z",
+   "msg": "klone has an SSH key for gannet: mark it so in autopilot.yaml",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/5dcb4facc5f03dd89637773ed1bd852accada929"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T13:01:33Z",
+   "msg": "klone: work directory, NXF_TEMP and logs on /gscratch/srlab",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/c1143912664dd0f32163c00d7e2fd28ef116d437"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T12:44:17Z",
+   "msg": "PLAN.md: status, as-built layout, backlog by state, phases and decisions",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/d711d3024f34836cefb26fc26811f458e80bf328"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T12:42:30Z",
+   "msg": "Concordance: draw the sample heatmap in Safari; keep it square on phones",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/96ad54339a818d67cfbd09237717a34443f9d06a"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-25T12:14:52Z",
+   "msg": "Dashboard: merged studies count as merged; compact Findings cards",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/7bf79043bc9a181bb6dd307f39f4b12bee18c6ab"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-24T16:34:02Z",
+   "msg": "GAWRA2023_POMS_ADAPTATION_BSCAPTURE: summarized (record-run gigantic_lorenz)",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/621a826e7ffe54dc51ab272e90f2c13ea7e9f87a"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-24T07:38:00Z",
+   "msg": "GAWRA2023_POMS_ADAPTATION_BSCAPTURE: fastq_staged",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/80e9a00b1c47928da201089c480a794f6ead68bd"
+  },
+  {
+   "repo": "project-white-whale",
+   "who": "Steven",
+   "at": "2026-11-24T06:01:30Z",
+   "msg": "Atlas: gene methylation classes page (always / never / variable)",
+   "url": "https://github.com/RobertsLab/project-white-whale/commit/2811820d6bf3f8ffb665a53acf4179d008c818bd"
+  }
+ ]
+}
